@@ -1,11 +1,11 @@
 [build]
   publish = ".next"
-  command = "rm -f package-lock.json && npm install && npm run build"
+  command = "npm install --force && npm run build"
 
 [build.environment]
   NODE_VERSION = "18"
-  NPM_FLAGS = "--prefix=/dev/null"
-  PNPM_FLAGS = "--no-frozen-lockfile"
+  NPM_VERSION = "9"
+  NPM_CONFIG_LEGACY_PEER_DEPS = "true"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
