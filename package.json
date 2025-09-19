@@ -6,7 +6,10 @@
     "build": "next build",
     "dev": "next dev",
     "lint": "next lint",
-    "start": "next start"
+    "start": "next start",
+    "init-db": "node scripts/init-hackathon-db.js",
+    "reset-db": "node scripts/init-hackathon-db.js",
+    "db:stats": "node -e \"console.log('📊 Database Stats:', JSON.stringify(require('./lib/temp-db-executor.ts').tempDB.getDatabaseStats(), null, 2))\""
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -45,10 +48,12 @@
     "@radix-ui/react-tooltip": "1.1.6",
     "@typechain/ethers-v6": "latest",
     "@typechain/hardhat": "latest",
+    "@types/better-sqlite3": "^7.6.13",
     "@types/chai": "^4.3.0",
     "@types/mocha": "^10.0.0",
     "@vercel/analytics": "^1.0.0",
     "autoprefixer": "^10.4.20",
+    "better-sqlite3": "^12.2.0",
     "chai": "^4.3.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

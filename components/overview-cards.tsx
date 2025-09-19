@@ -3,42 +3,107 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { TrendingUp, TrendingDown, DollarSign, Zap, Lock } from "lucide-react"
+import { useState, useEffect } from "react"
+import { tempDB } from "@/lib/temp-db-executor"
+
+type ChangeType = "positive" | "negative" | "neutral"
 
 export function OverviewCards() {
-  const stats = [
+  const [stats, setStats] = useState([
     {
       title: "Total Portfolio Value",
-      value: "$124,567.89",
-      change: "+12.5%",
-      changeType: "positive" as const,
+      value: "$0.00",
+      change: "+0%",
+      changeType: "neutral" as ChangeType,
       icon: DollarSign,
       description: "Across all SIPs and yield pools",
     },
     {
       title: "Active SIPs",
-      value: "8",
-      change: "+2 this month",
-      changeType: "positive" as const,
+      value: "0",
+      change: "Connect wallet",
+      changeType: "neutral" as ChangeType,
       icon: TrendingUp,
       description: "Automated investment plans",
     },
     {
       title: "Yield Earned",
-      value: "$3,247.12",
-      change: "+8.3%",
-      changeType: "positive" as const,
+      value: "$0.00",
+      change: "+0%",
+      changeType: "neutral" as ChangeType,
       icon: Zap,
       description: "Total yield from optimization",
     },
     {
       title: "Emergency Funds",
-      value: "$25,000.00",
-      change: "Locked",
-      changeType: "neutral" as const,
+      value: "$0.00",
+      change: "Not locked",
+      changeType: "neutral" as ChangeType,
       icon: Lock,
       description: "Secured in emergency vault",
     },
-  ]
+  ])
+
+  useEffect(() => {
+    loadRealData()
+  }, [])
+
+  const loadRealData = async () => {
+    try {
+      // Get real data from database
+      const data = tempDB.getAllData()
+      const demoUser = data.users[0] // For demo, use first user
+      
+      if (demoUser) {
+        const userSIPs = data.sips.filter(sip => sip.user_address === demoUser.wallet_address)
+        const userYield = data.yield_history.filter(yieldRecord => yieldRecord.user_address === demoUser.wallet_address)
+        const userVault = data.vault_locks.filter(vault => vault.user_address === demoUser.wallet_address)
+        
+        // Calculate real values
+        const totalInvested = parseFloat(demoUser.stats.total_invested)
+        const totalEarned = parseFloat(demoUser.stats.total_earned)
+        const totalPortfolio = totalInvested + totalEarned
+        const vaultBalance = parseFloat(demoUser.stats.vault_balance)
+        
+        setStats([
+          {
+            title: "Total Portfolio Value",
+            value: `$${totalPortfolio.toLocaleString()}`,
+            change: totalEarned > 0 ? `+${((totalEarned/totalInvested)*100).toFixed(1)}%` : "+0%",
+            changeType: totalEarned > 0 ? "positive" : "neutral",
+            icon: DollarSign,
+            description: "Across all SIPs and yield pools",
+          },
+          {
+            title: "Active SIPs",
+            value: userSIPs.length.toString(),
+            change: `${userSIPs.length} running`,
+            changeType: userSIPs.length > 0 ? "positive" : "neutral",
+            icon: TrendingUp,
+            description: "Automated investment plans",
+          },
+          {
+            title: "Yield Earned",
+            value: `$${totalEarned.toLocaleString()}`,
+            change: userYield.length > 0 ? `+${userYield.length} rewards` : "+0%",
+            changeType: totalEarned > 0 ? "positive" : "neutral",
+            icon: Zap,
+            description: "Total yield from optimization",
+          },
+          {
+            title: "Emergency Funds",
+            value: `$${vaultBalance.toLocaleString()}`,
+            change: userVault.length > 0 ? "Locked" : "Available",
+            changeType: userVault.length > 0 ? "neutral" : "positive",
+            icon: Lock,
+            description: "Secured in emergency vault",
+          },
+        ])
+      }
+    } catch (error) {
+      console.error("Failed to load real data:", error)
+    }
+  }
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

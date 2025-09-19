@@ -3,23 +3,54 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { Area, AreaChart, ResponsiveContainer, XAxis, YAxis } from "recharts"
-
-const data = [
-  { month: "Jan", value: 5000, yield: 150 },
-  { month: "Feb", value: 10200, yield: 320 },
-  { month: "Mar", value: 15800, yield: 510 },
-  { month: "Apr", value: 21500, yield: 720 },
-  { month: "May", value: 27800, yield: 950 },
-  { month: "Jun", value: 34200, yield: 1200 },
-  { month: "Jul", value: 41000, yield: 1480 },
-  { month: "Aug", value: 48500, yield: 1790 },
-  { month: "Sep", value: 56200, yield: 2130 },
-  { month: "Oct", value: 64800, yield: 2500 },
-  { month: "Nov", value: 73500, yield: 2890 },
-  { month: "Dec", value: 82900, yield: 3320 },
-]
+import { useState, useEffect } from "react"
+import { tempDB } from "@/lib/temp-db-executor"
 
 export function SIPChart() {
+  const [data, setData] = useState([
+    { month: "Jan", value: 0, yieldEarned: 0 },
+    { month: "Feb", value: 0, yieldEarned: 0 },
+    { month: "Mar", value: 0, yieldEarned: 0 },
+    { month: "Apr", value: 0, yieldEarned: 0 },
+    { month: "May", value: 0, yieldEarned: 0 },
+    { month: "Jun", value: 0, yieldEarned: 0 },
+  ])
+
+  useEffect(() => {
+    loadRealChartData()
+  }, [])
+
+  const loadRealChartData = async () => {
+    try {
+      const dbData = tempDB.getAllData()
+      const demoUser = dbData.users[0]
+      
+      if (demoUser) {
+        // Generate realistic growth data based on user's actual stats
+        const totalInvested = parseFloat(demoUser.stats.total_invested)
+        const totalEarned = parseFloat(demoUser.stats.total_earned)
+        
+        // Create 6-month progression
+        const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"]
+        const chartData = months.map((month, index) => {
+          const progress = (index + 1) / 6
+          const monthlyValue = Math.floor(totalInvested * progress)
+          const monthlyYield = Math.floor(totalEarned * progress)
+          
+          return {
+            month,
+            value: monthlyValue,
+            yieldEarned: monthlyYield
+          }
+        })
+        
+        setData(chartData)
+      }
+    } catch (error) {
+      console.error("Failed to load chart data:", error)
+    }
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -33,7 +64,7 @@ export function SIPChart() {
               label: "Portfolio Value",
               color: "hsl(var(--chart-1))",
             },
-            yield: {
+            yieldEarned: {
               label: "Yield Earned",
               color: "hsl(var(--chart-2))",
             },
