@@ -1,236 +1,300 @@
 "use client"
 
-import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 import { useRouter } from "next/navigation"
-import { Zap, Shield, TrendingUp, Wallet } from "lucide-react"
+import { useAccount, useDisconnect } from "wagmi"
+import { ConnectButton } from "@rainbow-me/rainbowkit"
+import { Zap, Shield, TrendingUp, MessageSquare, BarChart3, ArrowRight, Sparkles, Rocket, Star, LogOut } from "lucide-react"
+import { ThemeToggle } from "@/components/theme-toggle"
+import { useEffect, useState } from "react"
 
 export function LandingPage() {
-  const [isConnected, setIsConnected] = useState(false)
-  const [walletAddress, setWalletAddress] = useState("")
-  const [isConnecting, setIsConnecting] = useState(false)
+  const { address, isConnected } = useAccount()
+  const { disconnect } = useDisconnect()
   const router = useRouter()
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    checkWalletConnection()
+    setMounted(true)
   }, [])
 
-  const checkWalletConnection = async () => {
-    if (typeof window !== "undefined" && (window as any).ethereum) {
-      try {
-        const accounts = await (window as any).ethereum.request({ method: 'eth_accounts' })
-        if (accounts.length > 0) {
-          setWalletAddress(accounts[0])
-          setIsConnected(true)
-        }
-      } catch (error) {
-        console.log("Wallet not connected")
-      }
-    }
-  }
-
-  const connectWallet = async () => {
-    if (typeof window !== "undefined" && (window as any).ethereum) {
-      setIsConnecting(true)
-      try {
-        const accounts = await (window as any).ethereum.request({ 
-          method: 'eth_requestAccounts' 
-        })
-        
-        if (accounts.length > 0) {
-          setWalletAddress(accounts[0])
-          setIsConnected(true)
-          
-          // Redirect to dashboard after successful connection
-          setTimeout(() => {
-            router.push('/dashboard')
-          }, 1000)
-        }
-      } catch (error) {
-        console.error("Failed to connect wallet:", error)
-        alert("Failed to connect wallet. Please try again.")
-      } finally {
-        setIsConnecting(false)
-      }
-    } else {
-      alert("Please install MetaMask or another Web3 wallet to continue.")
-    }
-  }
-
-  const launchApp = () => {
-    if (isConnected) {
-      router.push('/dashboard')
-    } else {
-      connectWallet()
-    }
-  }
+  if (!mounted) return null
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950 text-white">
-      {/* Animated Background */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl animate-pulse delay-500"></div>
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 relative overflow-hidden">
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute top-40 right-20 w-96 h-96 bg-green-500/5 rounded-full blur-3xl animate-pulse delay-1000" />
+        <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-blue-500/5 rounded-full blur-3xl animate-pulse delay-2000" />
       </div>
 
       {/* Header */}
-      <header className="relative z-10 p-6">
-        <nav className="flex justify-between items-center max-w-7xl mx-auto">
-          <div className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-            SPHIRA
+      <header className="relative z-50 border-b bg-card/80 backdrop-blur-xl">
+        <div className="flex items-center justify-between px-6 py-4 max-w-7xl mx-auto">
+          <div className="flex items-center space-x-3 group">
+            <div className="w-12 h-12 bg-gradient-to-br from-primary to-primary/80 rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
+              <span className="text-primary-foreground font-bold text-xl">S</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <span className="font-bold text-2xl bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text">Sphira</span>
+              <Badge variant="secondary" className="animate-pulse bg-green-500/10 text-green-600 border-green-500/20">
+                v2.0
+              </Badge>
+            </div>
           </div>
-          <div className="hidden md:flex space-x-8">
-            <a href="#features" className="text-gray-300 hover:text-white transition-colors">Features</a>
-            <a href="#stats" className="text-gray-300 hover:text-white transition-colors">Stats</a>
+          <div className="flex items-center space-x-4">
+            <ThemeToggle />
+            {isConnected ? (
+              <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-2 px-3 py-2 bg-green-500/10 rounded-lg border border-green-500/20">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                  <span className="text-sm font-medium text-green-600">
+                    {address?.slice(0, 6)}...{address?.slice(-4)}
+                  </span>
+                </div>
+                <Button 
+                  onClick={() => router.push('/dashboard')}
+                  className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                >
+                  <BarChart3 className="mr-2 h-4 w-4" />
+                  Launch App
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => disconnect()}
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 border-red-200 hover:border-red-300 transition-all duration-300 hover:scale-105"
+                  title="Disconnect Wallet"
+                >
+                  <LogOut className="h-4 w-4" />
+                </Button>
+              </div>
+            ) : (
+              <div className="animate-bounce">
+                <ConnectButton />
+              </div>
+            )}
           </div>
-          <Button 
-            onClick={launchApp}
-            className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full transition-all duration-300 transform hover:scale-105"
-            disabled={isConnecting}
-          >
-            {isConnecting ? "Connecting..." : isConnected ? "Launch App" : "Connect Wallet"}
-          </Button>
-        </nav>
+        </div>
       </header>
 
       {/* Hero Section */}
-      <section className="relative z-10 flex items-center justify-center min-h-[80vh] px-6">
-        <div className="text-center max-w-4xl mx-auto">
-          <h1 className="text-5xl md:text-7xl font-black mb-8 bg-gradient-to-r from-white via-purple-200 to-purple-400 bg-clip-text text-transparent">
-            The Future of DeFi
-          </h1>
-          <p className="text-xl md:text-2xl text-gray-300 mb-12 max-w-2xl mx-auto">
-            Advanced SIP 2.0 platform with automated yields, emergency locks, and real-time analytics on Somnia blockchain
-          </p>
-          
-          {isConnected ? (
-            <div className="space-y-4">
-              <p className="text-green-400 text-lg">✅ Wallet Connected: {walletAddress.slice(0,6)}...{walletAddress.slice(-4)}</p>
-              <Button 
-                onClick={() => router.push('/dashboard')}
-                className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 text-xl rounded-full transition-all duration-300 transform hover:scale-105"
-              >
-                Launch Dashboard
-              </Button>
-            </div>
-          ) : (
-            <div className="space-y-6">
-              <Button 
-                onClick={connectWallet}
-                disabled={isConnecting}
-                className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 text-xl rounded-full transition-all duration-300 transform hover:scale-105"
-              >
-                {isConnecting ? "Connecting Wallet..." : "Connect Wallet to Start"}
-              </Button>
-              <p className="text-gray-400">Connect your Web3 wallet to access the platform</p>
-            </div>
-          )}
+      <section className="relative z-40 pt-20 pb-32 px-6">
+        <div className="max-w-6xl mx-auto text-center">
+          {/* Animated Badge */}
+          <div className="mb-8 animate-fade-in-up">
+            <Badge variant="outline" className="px-6 py-2 text-sm bg-gradient-to-r from-green-500/10 to-blue-500/10 border-green-500/20 text-green-600 hover:scale-105 transition-transform duration-300">
+              <Rocket className="w-4 h-4 mr-2 animate-pulse" />
+              Production Ready • Somnia Blockchain
+              <Sparkles className="w-4 h-4 ml-2 animate-pulse" />
+            </Badge>
+          </div>
+
+          {/* Main Title */}
+          <div className="mb-8 animate-fade-in-up delay-200">
+            <h1 className="text-5xl md:text-7xl lg:text-8xl font-black mb-6 text-green-500 leading-tight">
+              Advanced DeFi
+              <br />
+              Platform
+            </h1>
+          </div>
+
+          {/* Subtitle */}
+          <div className="mb-12 animate-fade-in-up delay-400">
+            <p className="text-xl md:text-2xl text-muted-foreground max-w-4xl mx-auto leading-relaxed">
+              Systematic Investment Plans, Yield Optimization, and Emergency Vaults
+              <br />
+              <span className="text-primary font-semibold">All powered by real blockchain data</span>
+            </p>
+          </div>
+
+          {/* CTA Section */}
+          <div className="animate-fade-in-up delay-600">
+            {isConnected ? (
+              <div className="space-y-6">
+                <div className="flex items-center justify-center space-x-3 text-green-600 animate-pulse">
+                  <div className="w-3 h-3 bg-green-500 rounded-full animate-ping" />
+                  <span className="font-medium">Connected: {address?.slice(0,6)}...{address?.slice(-4)}</span>
+                  <Star className="w-4 h-4 text-green-500" />
+                </div>
+                <Button 
+                  size="lg" 
+                  onClick={() => router.push('/dashboard')}
+                  className="px-12 py-6 text-xl bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-2xl hover:shadow-3xl transition-all duration-500 hover:scale-110 rounded-2xl"
+                >
+                  <BarChart3 className="mr-3 h-6 w-6" />
+                  Open Dashboard
+                  <ArrowRight className="ml-3 h-6 w-6" />
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-6 flex flex-col items-center">
+                <div className="transform hover:scale-105 transition-transform duration-300">
+                  <ConnectButton />
+                </div>
+                <p className="text-muted-foreground animate-pulse text-center">Connect your wallet to access the platform</p>
+              </div>
+            )}
+          </div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section id="features" className="relative z-10 py-20 px-6">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold text-center mb-16 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-            Revolutionary Features
-          </h2>
-          
+      {/* Features Grid */}
+      <section className="relative z-30 py-20 px-6">
+        <div className="max-w-7xl mx-auto">
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <Card className="bg-slate-900/50 border-purple-500/20 backdrop-blur-sm">
-              <CardContent className="p-6 text-center">
-                <TrendingUp className="h-12 w-12 text-purple-400 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold mb-2 text-white">Automated SIPs</h3>
-                <p className="text-gray-400">Schedule recurring deposits with intelligent optimization</p>
-              </CardContent>
-            </Card>
-            
-            <Card className="bg-slate-900/50 border-purple-500/20 backdrop-blur-sm">
-              <CardContent className="p-6 text-center">
-                <Zap className="h-12 w-12 text-purple-400 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold mb-2 text-white">Yield Optimization</h3>
-                <p className="text-gray-400">AI-powered fund distribution for maximum returns</p>
-              </CardContent>
-            </Card>
-            
-            <Card className="bg-slate-900/50 border-purple-500/20 backdrop-blur-sm">
-              <CardContent className="p-6 text-center">
-                <Shield className="h-12 w-12 text-purple-400 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold mb-2 text-white">Emergency Vault</h3>
-                <p className="text-gray-400">Secure emergency fund protection with time locks</p>
-              </CardContent>
-            </Card>
-            
-            <Card className="bg-slate-900/50 border-purple-500/20 backdrop-blur-sm">
-              <CardContent className="p-6 text-center">
-                <Wallet className="h-12 w-12 text-purple-400 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold mb-2 text-white">Somnia Blockchain</h3>
-                <p className="text-gray-400">High TPS, low fees, instant execution</p>
-              </CardContent>
-            </Card>
+            {[
+              {
+                icon: TrendingUp,
+                title: "SIP 2.0",
+                description: "Automated systematic investment plans with real blockchain execution",
+                color: "from-primary/20 to-primary/5",
+                iconColor: "text-primary",
+                delay: "delay-100"
+              },
+              {
+                icon: Zap,
+                title: "Yield Optimization",
+                description: "AI-powered yield routing across Somnia DeFi pools",
+                color: "from-green-500/20 to-green-500/5",
+                iconColor: "text-green-600",
+                delay: "delay-200"
+              },
+              {
+                icon: Shield,
+                title: "Emergency Vault",
+                description: "Secure fund locking with time-based protection",
+                color: "from-orange-500/20 to-orange-500/5",
+                iconColor: "text-orange-600",
+                delay: "delay-300"
+              },
+              {
+                icon: MessageSquare,
+                title: "AI Assistant",
+                description: "Intelligent chatbot powered by Gemini AI",
+                color: "from-blue-500/20 to-blue-500/5",
+                iconColor: "text-blue-600",
+                delay: "delay-400"
+              }
+            ].map((feature, index) => (
+              <Card 
+                key={index}
+                className={`group hover:shadow-2xl transition-all duration-500 hover:scale-105 animate-fade-in-up ${feature.delay} border-0 bg-gradient-to-br ${feature.color} backdrop-blur-sm`}
+              >
+                <CardHeader className="text-center pb-4">
+                  <div className={`w-16 h-16 bg-gradient-to-br ${feature.color} rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
+                    <feature.icon className={`h-8 w-8 ${feature.iconColor}`} />
+                  </div>
+                  <CardTitle className="text-xl font-bold group-hover:text-primary transition-colors duration-300">
+                    {feature.title}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="text-center">
+                  <p className="text-muted-foreground leading-relaxed">
+                    {feature.description}
+                  </p>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
       </section>
 
       {/* Stats Section */}
-      <section id="stats" className="relative z-10 py-20 px-6 bg-slate-900/30">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl font-bold mb-16 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-            Platform Stats
-          </h2>
-          
-          <div className="grid md:grid-cols-4 gap-8">
-            <div>
-              <div className="text-4xl font-bold text-purple-400 mb-2">$2M+</div>
-              <div className="text-gray-400">Total Value Locked</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold text-purple-400 mb-2">15%</div>
-              <div className="text-gray-400">Average APY</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold text-purple-400 mb-2">1,000+</div>
-              <div className="text-gray-400">Active Users</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold text-purple-400 mb-2">99.9%</div>
-              <div className="text-gray-400">Uptime</div>
-            </div>
-          </div>
+      <section className="relative z-20 py-20 px-6">
+        <div className="max-w-5xl mx-auto">
+          <Card className="bg-gradient-to-br from-card/80 to-muted/20 backdrop-blur-xl border-0 shadow-2xl animate-fade-in-up delay-500">
+            <CardHeader className="text-center pb-8">
+              <CardTitle className="text-3xl font-bold bg-gradient-to-r from-foreground to-primary bg-clip-text text-transparent">
+                Platform Statistics
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid md:grid-cols-3 gap-12 text-center">
+                {[
+                  { value: "100%", label: "Real Blockchain Data", color: "text-primary" },
+                  { value: "Live", label: "Smart Contract Integration", color: "text-green-600" },
+                  { value: "AI", label: "Powered Assistant", color: "text-blue-600" }
+                ].map((stat, index) => (
+                  <div key={index} className="group hover:scale-110 transition-transform duration-300">
+                    <div className={`text-5xl font-black ${stat.color} mb-4 group-hover:animate-pulse`}>
+                      {stat.value}
+                    </div>
+                    <p className="text-muted-foreground font-medium">{stat.label}</p>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="relative z-10 py-20 px-6">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl font-bold mb-8 bg-gradient-to-r from-white to-purple-400 bg-clip-text text-transparent">
-            Ready to Start Earning?
-          </h2>
-          <p className="text-xl text-gray-300 mb-12">
-            Join the future of decentralized finance with Sphira
-          </p>
-          <Button 
-            onClick={launchApp}
-            disabled={isConnecting}
-            className="bg-purple-600 hover:bg-purple-700 text-white px-12 py-4 text-xl rounded-full transition-all duration-300 transform hover:scale-105"
-          >
-            {isConnecting ? "Connecting..." : isConnected ? "Launch App" : "Get Started Now"}
-          </Button>
-        </div>
-      </section>
+      {!isConnected && (
+        <section className="relative z-10 py-20 px-6">
+          <div className="max-w-3xl mx-auto">
+            <Card className="text-center bg-gradient-to-br from-primary/10 via-card to-primary/5 backdrop-blur-xl border-primary/20 shadow-2xl animate-fade-in-up delay-700">
+              <CardContent className="pt-12 pb-12">
+                <h3 className="text-4xl font-bold mb-6 bg-gradient-to-r from-foreground to-primary bg-clip-text text-transparent">
+                  Ready to Start?
+                </h3>
+                <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
+                  Connect your wallet and experience the future of DeFi
+                </p>
+                <div className="flex justify-center transform hover:scale-105 transition-transform duration-300">
+                  <ConnectButton />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </section>
+      )}
 
       {/* Footer */}
-      <footer className="relative z-10 py-12 px-6 border-t border-slate-800">
-        <div className="max-w-6xl mx-auto text-center">
-          <div className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent mb-4">
-            SPHIRA
+      <footer className="relative z-10 border-t bg-card/80 backdrop-blur-xl mt-20">
+        <div className="max-w-7xl mx-auto px-6 py-12 text-center">
+          <div className="flex items-center justify-center space-x-3 mb-6 group">
+            <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary/80 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
+              <span className="text-primary-foreground font-bold text-lg">S</span>
+            </div>
+            <span className="font-bold text-2xl bg-gradient-to-r from-foreground to-primary bg-clip-text text-transparent">
+              Sphira
+            </span>
           </div>
-          <p className="text-gray-400">
-            Built for the future of decentralized finance • Powered by Somnia Blockchain
+          <p className="text-muted-foreground">
+            Built on Somnia Blockchain • Powered by AI • Production Ready
           </p>
         </div>
       </footer>
+
+      <style jsx global>{`
+        @keyframes fade-in-up {
+          from {
+            opacity: 0;
+            transform: translateY(30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        
+        .animate-fade-in-up {
+          animation: fade-in-up 0.8s ease-out forwards;
+        }
+        
+        .delay-100 { animation-delay: 0.1s; }
+        .delay-200 { animation-delay: 0.2s; }
+        .delay-300 { animation-delay: 0.3s; }
+        .delay-400 { animation-delay: 0.4s; }
+        .delay-500 { animation-delay: 0.5s; }
+        .delay-600 { animation-delay: 0.6s; }
+        .delay-700 { animation-delay: 0.7s; }
+      `}</style>
     </div>
   )
 }

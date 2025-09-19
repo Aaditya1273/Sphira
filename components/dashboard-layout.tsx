@@ -2,27 +2,68 @@
 
 import type React from "react"
 import { useState } from "react"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
+import { useAccount, useDisconnect } from "wagmi"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { ChatInterface } from "@/components/chat-interface"
 import { NotificationCenter } from "@/components/notification-center"
 import { ThemeToggle } from "@/components/theme-toggle"
-import { BarChart3, Wallet, Shield, MessageSquare, Settings, Menu, X, TrendingUp, Lock, Zap } from "lucide-react"
+import { BarChart3, Wallet, Shield, MessageSquare, Settings, Menu, X, TrendingUp, Lock, Zap, LogOut } from "lucide-react"
 
 interface DashboardLayoutProps {
   children: React.ReactNode
 }
 
+function WalletInfo() {
+  const { address, isConnected } = useAccount()
+  const { disconnect } = useDisconnect()
+  const router = useRouter()
+
+  const handleLogout = () => {
+    disconnect()
+    router.push('/')
+  }
+
+  if (!isConnected || !address) {
+    return (
+      <Button variant="outline" size="sm">
+        <Wallet className="h-4 w-4 mr-2" />
+        Connect Wallet
+      </Button>
+    )
+  }
+
+  const shortAddress = `${address.slice(0, 6)}...${address.slice(-4)}`
+
+  return (
+    <div className="flex items-center space-x-2">
+      <div className="flex items-center space-x-2 px-3 py-1 bg-green-100 dark:bg-green-900/20 rounded-lg">
+        <div className="w-2 h-2 bg-green-500 rounded-full" />
+        <span className="text-sm font-medium text-green-700 dark:text-green-400">
+          {shortAddress}
+        </span>
+      </div>
+      <Button 
+        variant="outline" 
+        size="sm" 
+        onClick={handleLogout}
+        className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+        title="Logout and return to home"
+      >
+        <LogOut className="h-4 w-4" />
+      </Button>
+    </div>
+  )
+}
+
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [chatOpen, setChatOpen] = useState(false)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const pathname = usePathname()
 
   const navigation = [
-    { name: "Dashboard", href: "/", icon: BarChart3 },
+    { name: "Dashboard", href: "/dashboard", icon: BarChart3 },
     { name: "My SIPs", href: "/sips", icon: TrendingUp },
     { name: "Yield Optimizer", href: "/yield", icon: Zap },
     { name: "Emergency Vault", href: "/vault", icon: Lock },
@@ -168,14 +209,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             <div className="flex items-center space-x-4">
               <NotificationCenter />
               <ThemeToggle />
-              <Button variant="outline" size="sm" onClick={() => setChatOpen(!chatOpen)}>
-                <MessageSquare className="h-4 w-4 mr-2" />
-                Chat Assistant
-              </Button>
-              <Button variant="outline" size="sm">
-                <Wallet className="h-4 w-4 mr-2" />
-                Connect Wallet
-              </Button>
+              <WalletInfo />
             </div>
           </div>
         </div>
@@ -184,12 +218,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         <main className="p-6">{children}</main>
       </div>
 
-      {/* Floating chat interface */}
-      {chatOpen && (
-        <div className="fixed bottom-4 right-4 z-50 w-96 h-[600px] hidden lg:block">
-          <ChatInterface isOpen={chatOpen} onClose={() => setChatOpen(false)} />
-        </div>
-      )}
     </div>
   )
 }

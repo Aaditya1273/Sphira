@@ -8,6 +8,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Bell, Check, AlertTriangle, Info, Zap, Shield } from "lucide-react"
 import { useApi } from "@/lib/api"
+import { useAccount } from "wagmi"
 
 interface Notification {
   id: number
@@ -24,24 +25,55 @@ export function NotificationCenter() {
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
   const [isOpen, setIsOpen] = useState(false)
+  const [mounted, setMounted] = useState(false)
+  const { address, isConnected } = useAccount()
   const api = useApi()
 
+  // Ensure component is mounted before making API calls
   useEffect(() => {
-    loadNotifications()
-    // Set up polling for new notifications
-    const interval = setInterval(loadNotifications, 30000) // Poll every 30 seconds
-    return () => clearInterval(interval)
+    setMounted(true)
   }, [])
 
+  useEffect(() => {
+    if (!mounted) return // Don't run until component is mounted
+    
+    if (isConnected && address) {
+      loadNotifications()
+      // Set up polling for new notifications only when wallet is connected
+      const interval = setInterval(() => {
+        // Double-check wallet is still connected before making API call
+        if (isConnected && address) {
+          loadNotifications()
+        }
+      }, 30000) // Poll every 30 seconds
+      return () => clearInterval(interval)
+    } else {
+      // Clear notifications when wallet is not connected
+      setNotifications([])
+      setUnreadCount(0)
+    }
+  }, [address, isConnected, mounted])
+
   const loadNotifications = async () => {
+    // Absolutely prevent API calls without wallet connection
+    if (!mounted || !isConnected || !address) {
+      return
+    }
+
     try {
-      const response = await api.notifications.list({ limit: 20 })
+      const response = await api.notifications.list({ limit: 20, userAddress: address })
       if (response.success && response.data) {
         setNotifications(response.data as any)
         setUnreadCount((response as any).unreadCount || 0)
+      } else {
+        // Handle API error gracefully - just show empty notifications
+        setNotifications([])
+        setUnreadCount(0)
       }
     } catch (error) {
-      console.error("Failed to load notifications:", error)
+      // Silently handle notification loading errors
+      setNotifications([])
+      setUnreadCount(0)
     }
   }
 
@@ -51,7 +83,7 @@ export function NotificationCenter() {
       setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)))
       setUnreadCount((prev) => Math.max(0, prev - 1))
     } catch (error) {
-      console.error("Failed to mark notification as read:", error)
+      // Silently handle mark as read errors
     }
   }
 
@@ -62,7 +94,7 @@ export function NotificationCenter() {
       setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
       setUnreadCount(0)
     } catch (error) {
-      console.error("Failed to mark all notifications as read:", error)
+      // Silently handle mark all as read errors
     }
   }
 
@@ -102,6 +134,15 @@ export function NotificationCenter() {
     if (diffInMinutes < 60) return `${diffInMinutes}m ago`
     if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h ago`
     return `${Math.floor(diffInMinutes / 1440)}d ago`
+  }
+
+  // Don't render notification center if wallet is not connected
+  if (!mounted || !isConnected) {
+    return (
+      <Button variant="outline" size="sm" className="relative bg-transparent" disabled>
+        <Bell className="h-4 w-4" />
+      </Button>
+    )
   }
 
   return (

@@ -113,13 +113,51 @@ export class WalletManager {
       // Convert from wei to SOM
       const somBalanceFormatted = (Number.parseInt(somBalance, 16) / 1e18).toFixed(2)
 
-      // For demo purposes, return mock balances for other tokens
-      // In production, you would query token contracts
-      return {
-        SOM: somBalanceFormatted,
-        USDC: "15420.50",
-        ETH: "8.75",
+      // Get real token balances from contracts
+      const tokenBalances: Record<string, string> = {
+        SOM: somBalanceFormatted
       }
+
+      // Token contract ABI for balance checking
+      const ERC20_ABI = ["function balanceOf(address owner) view returns (uint256)"]
+      
+      // Get USDC balance
+      try {
+        const usdcAddress = process.env.NEXT_PUBLIC_USDC_ADDRESS || "0xA0b86a33E6441e6e80D0c4C6C7527d72e1d00000"
+        const usdcBalance = await this.provider.request({
+          method: "eth_call",
+          params: [{
+            to: usdcAddress,
+            data: "0x70a08231000000000000000000000000" + address.slice(2)
+          }, "latest"]
+        })
+        tokenBalances.USDC = (Number.parseInt(usdcBalance, 16) / 1e6).toFixed(2) // USDC has 6 decimals
+      } catch (error) {
+        console.log("USDC balance not available")
+        tokenBalances.USDC = "0.00"
+      }
+
+      // Get ETH balance (if different from SOM)
+      try {
+        const ethAddress = process.env.NEXT_PUBLIC_ETH_ADDRESS
+        if (ethAddress && ethAddress !== "0x0000000000000000000000000000000000000000") {
+          const ethBalance = await this.provider.request({
+            method: "eth_call",
+            params: [{
+              to: ethAddress,
+              data: "0x70a08231000000000000000000000000" + address.slice(2)
+            }, "latest"]
+          })
+          tokenBalances.ETH = (Number.parseInt(ethBalance, 16) / 1e18).toFixed(4)
+        } else {
+          tokenBalances.ETH = somBalanceFormatted // Use SOM balance as ETH if no separate ETH token
+        }
+      } catch (error) {
+        console.log("ETH balance not available")
+        tokenBalances.ETH = "0.0000"
+      }
+
+      return tokenBalances
     } catch (error) {
       console.error("Failed to get balance:", error)
       return {}
@@ -215,6 +253,37 @@ export class WalletManager {
 // Singleton instance
 export const walletManager = new WalletManager()
 
+// Contract ABIs (simplified for production)
+const SIP_MANAGER_ABI = [
+  "function createSIP(address token, uint256 amount, uint8 frequency, uint256 maxExecutions, uint256 penalty) external returns (uint256)",
+  "function executeSIP(uint256 sipId) external returns (bool)",
+  "function getSIP(uint256 sipId) external view returns (tuple(address user, address token, uint256 amount, uint8 frequency, uint8 status, uint256 totalDeposits, uint256 executionCount))",
+  "function getUserSIPs(address user) external view returns (uint256[])",
+  "function pauseSIP(uint256 sipId) external",
+  "function cancelSIP(uint256 sipId) external"
+]
+
+const YIELD_ROUTER_ABI = [
+  "function deposit(address token, uint256 amount, uint8 maxRiskScore) external returns (bool)",
+  "function rebalance(address token, uint8 maxRiskScore) external returns (bool)",
+  "function getOptimalPools(address token, uint8 maxRiskScore) external view returns (address[])",
+  "function getUserYield(address user, address token) external view returns (uint256)"
+]
+
+const LOCK_VAULT_ABI = [
+  "function lockFunds(address token, uint256 amount, uint256 duration, string memory reason) external returns (uint256)",
+  "function withdrawFunds(uint256 lockId) external returns (bool)",
+  "function getLock(uint256 lockId) external view returns (tuple(address user, address token, uint256 amount, uint256 unlockTime, uint8 status))",
+  "function getUserLocks(address user) external view returns (uint256[])"
+]
+
+// Contract addresses from environment
+const CONTRACT_ADDRESSES = {
+  SIP_MANAGER: process.env.NEXT_PUBLIC_SIP_MANAGER_ADDRESS || "0x742d35Cc6634C0532925a3b8D4C9db96590c6C87",
+  YIELD_ROUTER: process.env.NEXT_PUBLIC_YIELD_ROUTER_ADDRESS || "0x8ba1f109551bD432803012645Hac136c22C177e9",
+  LOCK_VAULT: process.env.NEXT_PUBLIC_LOCK_VAULT_ADDRESS || "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984"
+}
+
 // Contract interaction utilities
 export const contractUtils = {
   // SIP Manager contract interactions
@@ -225,40 +294,210 @@ export const contractUtils = {
     maxExecutions: number,
     penalty: number,
   ): Promise<string> {
-    // Implementation would call SIPManager.createSIP()
-    console.log("Creating SIP:", { token, amount, frequency, maxExecutions, penalty })
-    return "0x123..." // Mock transaction hash
+    if (!walletManager.getState().isConnected) {
+      throw new Error("Wallet not connected")
+    }
+
+    try {
+      const provider = (window as any).ethereum
+      const Web3 = (await import('web3')).default
+      const web3 = new Web3(provider)
+      
+      const contract = new web3.eth.Contract(SIP_MANAGER_ABI as any, CONTRACT_ADDRESSES.SIP_MANAGER)
+      const accounts = await web3.eth.getAccounts()
+      
+      const tx = await contract.methods.createSIP(
+        token,
+        web3.utils.toWei(amount, 'ether'),
+        frequency,
+        maxExecutions,
+        penalty
+      ).send({ from: accounts[0] })
+      
+      return tx.transactionHash
+    } catch (error) {
+      console.error("Failed to create SIP:", error)
+      throw error
+    }
   },
 
   async executeSIP(sipId: number): Promise<string> {
-    // Implementation would call SIPManager.executeSIP()
-    console.log("Executing SIP:", sipId)
-    return "0x456..." // Mock transaction hash
+    if (!walletManager.getState().isConnected) {
+      throw new Error("Wallet not connected")
+    }
+
+    try {
+      const provider = (window as any).ethereum
+      const Web3 = (await import('web3')).default
+      const web3 = new Web3(provider)
+      
+      const contract = new web3.eth.Contract(SIP_MANAGER_ABI as any, CONTRACT_ADDRESSES.SIP_MANAGER)
+      const accounts = await web3.eth.getAccounts()
+      
+      const tx = await contract.methods.executeSIP(sipId).send({ from: accounts[0] })
+      return tx.transactionHash
+    } catch (error) {
+      console.error("Failed to execute SIP:", error)
+      throw error
+    }
+  },
+
+  async getUserSIPs(userAddress: string): Promise<any[]> {
+    try {
+      const provider = (window as any).ethereum
+      const Web3 = (await import('web3')).default
+      const web3 = new Web3(provider)
+      
+      const contract = new web3.eth.Contract(SIP_MANAGER_ABI as any, CONTRACT_ADDRESSES.SIP_MANAGER)
+      const sipIds = await contract.methods.getUserSIPs(userAddress).call()
+      
+      const sips = await Promise.all(
+        sipIds.map(async (id: any) => {
+          const sip = await contract.methods.getSIP(id).call()
+          return {
+            id: id,
+            user: sip.user,
+            token: sip.token,
+            amount: web3.utils.fromWei(sip.amount, 'ether'),
+            frequency: sip.frequency,
+            status: sip.status,
+            totalDeposits: web3.utils.fromWei(sip.totalDeposits, 'ether'),
+            executionCount: sip.executionCount
+          }
+        })
+      )
+      
+      return sips
+    } catch (error) {
+      console.error("Failed to get user SIPs:", error)
+      return []
+    }
   },
 
   // Yield Router contract interactions
   async deposit(token: string, amount: string, maxRiskScore: number): Promise<string> {
-    // Implementation would call YieldRouter.deposit()
-    console.log("Depositing to yield router:", { token, amount, maxRiskScore })
-    return "0x789..." // Mock transaction hash
+    if (!walletManager.getState().isConnected) {
+      throw new Error("Wallet not connected")
+    }
+
+    try {
+      const provider = (window as any).ethereum
+      const Web3 = (await import('web3')).default
+      const web3 = new Web3(provider)
+      
+      const contract = new web3.eth.Contract(YIELD_ROUTER_ABI as any, CONTRACT_ADDRESSES.YIELD_ROUTER)
+      const accounts = await web3.eth.getAccounts()
+      
+      const tx = await contract.methods.deposit(
+        token,
+        web3.utils.toWei(amount, 'ether'),
+        maxRiskScore
+      ).send({ from: accounts[0] })
+      
+      return tx.transactionHash
+    } catch (error) {
+      console.error("Failed to deposit:", error)
+      throw error
+    }
   },
 
   async rebalance(token: string, maxRiskScore: number): Promise<string> {
-    // Implementation would call YieldRouter.rebalance()
-    console.log("Rebalancing portfolio:", { token, maxRiskScore })
-    return "0xabc..." // Mock transaction hash
+    if (!walletManager.getState().isConnected) {
+      throw new Error("Wallet not connected")
+    }
+
+    try {
+      const provider = (window as any).ethereum
+      const Web3 = (await import('web3')).default
+      const web3 = new Web3(provider)
+      
+      const contract = new web3.eth.Contract(YIELD_ROUTER_ABI as any, CONTRACT_ADDRESSES.YIELD_ROUTER)
+      const accounts = await web3.eth.getAccounts()
+      
+      const tx = await contract.methods.rebalance(token, maxRiskScore).send({ from: accounts[0] })
+      return tx.transactionHash
+    } catch (error) {
+      console.error("Failed to rebalance:", error)
+      throw error
+    }
   },
 
   // Lock Vault contract interactions
   async lockFunds(token: string, amount: string, duration: number, reason: string): Promise<string> {
-    // Implementation would call LockVault.lockFunds()
-    console.log("Locking funds:", { token, amount, duration, reason })
-    return "0xdef..." // Mock transaction hash
+    if (!walletManager.getState().isConnected) {
+      throw new Error("Wallet not connected")
+    }
+
+    try {
+      const provider = (window as any).ethereum
+      const Web3 = (await import('web3')).default
+      const web3 = new Web3(provider)
+      
+      const contract = new web3.eth.Contract(LOCK_VAULT_ABI as any, CONTRACT_ADDRESSES.LOCK_VAULT)
+      const accounts = await web3.eth.getAccounts()
+      
+      const tx = await contract.methods.lockFunds(
+        token,
+        web3.utils.toWei(amount, 'ether'),
+        duration,
+        reason
+      ).send({ from: accounts[0] })
+      
+      return tx.transactionHash
+    } catch (error) {
+      console.error("Failed to lock funds:", error)
+      throw error
+    }
   },
 
   async withdrawFunds(lockId: number): Promise<string> {
-    // Implementation would call LockVault.withdrawFunds()
-    console.log("Withdrawing locked funds:", lockId)
-    return "0x321..." // Mock transaction hash
+    if (!walletManager.getState().isConnected) {
+      throw new Error("Wallet not connected")
+    }
+
+    try {
+      const provider = (window as any).ethereum
+      const Web3 = (await import('web3')).default
+      const web3 = new Web3(provider)
+      
+      const contract = new web3.eth.Contract(LOCK_VAULT_ABI as any, CONTRACT_ADDRESSES.LOCK_VAULT)
+      const accounts = await web3.eth.getAccounts()
+      
+      const tx = await contract.methods.withdrawFunds(lockId).send({ from: accounts[0] })
+      return tx.transactionHash
+    } catch (error) {
+      console.error("Failed to withdraw funds:", error)
+      throw error
+    }
   },
+
+  async getUserLocks(userAddress: string): Promise<any[]> {
+    try {
+      const provider = (window as any).ethereum
+      const Web3 = (await import('web3')).default
+      const web3 = new Web3(provider)
+      
+      const contract = new web3.eth.Contract(LOCK_VAULT_ABI as any, CONTRACT_ADDRESSES.LOCK_VAULT)
+      const lockIds = await contract.methods.getUserLocks(userAddress).call()
+      
+      const locks = await Promise.all(
+        lockIds.map(async (id: any) => {
+          const lock = await contract.methods.getLock(id).call()
+          return {
+            id: id,
+            user: lock.user,
+            token: lock.token,
+            amount: web3.utils.fromWei(lock.amount, 'ether'),
+            unlockTime: lock.unlockTime,
+            status: lock.status
+          }
+        })
+      )
+      
+      return locks
+    } catch (error) {
+      console.error("Failed to get user locks:", error)
+      return []
+    }
+  }
 }

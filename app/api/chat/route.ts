@@ -1,17 +1,20 @@
 import { type NextRequest, NextResponse } from "next/server"
+import { GoogleGenerativeAI } from "@google/generative-ai"
 
 interface ChatMessage {
   message: string
   userId?: string
 }
 
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || process.env["GEMINI_API-KEY"] || "")
+
 export async function POST(request: NextRequest) {
   try {
     const body: ChatMessage = await request.json()
     const { message, userId = "user1" } = body
 
-    // Process chat command
-    const response = await processChatCommand(message, userId)
+    // Process with Gemini AI
+    const response = await processWithGeminiAI(message, userId)
 
     return NextResponse.json({
       success: true,
@@ -26,70 +29,78 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function processChatCommand(message: string, userId: string): Promise<string> {
+async function processWithGeminiAI(message: string, userId: string): Promise<string> {
+  try {
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
+    
+    const prompt = `You are Sphira AI Assistant, an expert DeFi platform assistant for the Sphira platform built on Somnia blockchain. 
+
+CONTEXT: Sphira is a comprehensive DeFi platform that offers:
+- SIP (Systematic Investment Plans) for crypto
+- Yield optimization strategies
+- Emergency vault for secure fund locking
+- Portfolio management and analytics
+- Built on Somnia blockchain network
+
+USER MESSAGE: "${message}"
+
+INSTRUCTIONS:
+- Be helpful, professional, and knowledgeable about DeFi
+- Focus on Sphira platform features
+- If user asks about specific commands, explain them clearly
+- For general questions, provide informative DeFi/crypto advice
+- Keep responses concise but informative
+- Always relate back to how Sphira can help them
+- Don't mention wallet connection requirements
+
+AVAILABLE FEATURES:
+- /startSIP - Create systematic investment plans
+- /portfolio - View portfolio analytics  
+- /yield - Optimize yield strategies
+- /lockFunds - Secure emergency funds
+- /balance - Check balances
+- /history - Transaction history
+
+Respond naturally and helpfully:`
+
+    const result = await model.generateContent(prompt)
+    const response = await result.response
+    return response.text()
+  } catch (error) {
+    console.error("Gemini AI error:", error)
+    // Fallback to basic responses if AI fails
+    return processBasicCommand(message)
+  }
+}
+
+function processBasicCommand(message: string): string {
   const command = message.toLowerCase().trim()
 
-  if (command.startsWith("/startsip")) {
-    const parts = command.split(" ")
-    if (parts.length >= 4) {
-      const [, amount, token, frequency] = parts
-      // In production, create SIP via smart contract
-      return `Creating SIP: ${amount} ${token.toUpperCase()} ${frequency}. Please confirm the transaction in your wallet.`
-    }
-    return "Usage: /startSIP <amount> <token> <frequency>\nExample: /startSIP 100 USDC weekly"
+  if (command.includes("sip") || command.includes("investment")) {
+    return "💰 Start your crypto SIP journey with Sphira! Create systematic investment plans to build wealth over time. Try '/startSIP 100 USDC weekly' to get started."
   }
 
-  if (command === "/portfolio") {
-    // In production, fetch real portfolio data
-    return "📊 Portfolio Summary:\n• Total Value: $124,567.89\n• Active SIPs: 8\n• Yield Earned: $3,247.12\n• Emergency Funds: $25,000.00"
+  if (command.includes("portfolio") || command.includes("balance")) {
+    return "📊 Track your DeFi portfolio with Sphira's advanced analytics. Monitor your investments, yields, and performance across the Somnia blockchain."
   }
 
-  if (command === "/yield") {
-    return "⚡ Yield Optimization:\n• Current APY: 11.2%\n• Best Pool: Somnia LP (12.5%)\n• Suggestion: Rebalance for +2.3% improvement"
+  if (command.includes("yield") || command.includes("farming")) {
+    return "⚡ Maximize your returns with Sphira's yield optimization! We find the best pools and strategies to grow your crypto assets."
   }
 
-  if (command.startsWith("/lockfunds")) {
-    const parts = command.split(" ")
-    if (parts.length >= 4) {
-      const [, amount, token, duration] = parts
-      return `Locking ${amount} ${token.toUpperCase()} for ${duration}. This will secure your funds in the emergency vault. Confirm transaction?`
-    }
-    return "Usage: /lockFunds <amount> <token> <duration>\nExample: /lockFunds 5000 USDC 30days"
+  if (command.includes("help")) {
+    return `🚀 Welcome to Sphira AI Assistant! 
+
+I can help you with:
+• Creating SIPs (/startSIP)
+• Portfolio tracking (/portfolio) 
+• Yield optimization (/yield)
+• Emergency funds (/lockFunds)
+• Balance checking (/balance)
+• Transaction history (/history)
+
+Ask me anything about DeFi or use these commands!`
   }
 
-  if (command === "/balance") {
-    return "💰 Wallet Balance:\n• USDC: 15,420.50\n• ETH: 8.75\n• SOM: 25,000.00\n• Total USD: $89,234.12"
-  }
-
-  if (command === "/history") {
-    return "📈 Recent Transactions:\n• SIP Deposit: +$500 USDC (2 min ago)\n• Yield Harvest: +$47.23 (1 hour ago)\n• Portfolio Rebalance (3 hours ago)"
-  }
-
-  if (command === "/help") {
-    return `Available Commands:
-
-/startSIP - Create a new SIP
-Example: /startSIP 100 USDC weekly
-
-/portfolio - View portfolio summary
-Example: /portfolio
-
-/yield - Check yield optimization
-Example: /yield
-
-/lockFunds - Lock emergency funds
-Example: /lockFunds 5000 USDC 30days
-
-/balance - Check wallet balance
-Example: /balance
-
-/history - View transaction history
-Example: /history
-
-/help - Show available commands
-Example: /help`
-  }
-
-  // Default response for unrecognized commands
-  return "I didn't understand that command. Type /help to see available commands."
+  return "👋 Hi! I'm your Sphira AI Assistant. I can help you with DeFi investments, SIPs, yield farming, and portfolio management on Somnia blockchain. What would you like to know?"
 }

@@ -13,7 +13,7 @@ interface ApiResponse<T> {
 class ApiClient {
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
     try {
-      const response = await fetch(`${API_BASE_URL}/api${endpoint}`, {
+      const response = await fetch(`/api${endpoint}`, {
         headers: {
           "Content-Type": "application/json",
           ...options.headers,
@@ -24,7 +24,11 @@ class ApiClient {
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || "API request failed")
+        // Silently handle API errors - don't log expected errors like "User address required"
+        return {
+          success: false,
+          error: data.error || "API request failed",
+        }
       }
 
       return data
@@ -38,8 +42,8 @@ class ApiClient {
   }
 
   // SIP API methods
-  async getSIPs(userId?: string) {
-    const params = userId ? `?userId=${userId}` : ""
+  async getSIPs(userAddress?: string) {
+    const params = userAddress ? `?userAddress=${userAddress}` : ""
     return this.request(`/sips${params}`)
   }
 
@@ -83,16 +87,17 @@ class ApiClient {
   }
 
   // Portfolio API methods
-  async getPortfolio(userId?: string) {
-    const params = userId ? `?userId=${userId}` : ""
+  async getPortfolio(userAddress?: string) {
+    const params = userAddress ? `?userAddress=${userAddress}` : ""
     return this.request(`/portfolio${params}`)
   }
 
   // Notifications API methods
-  async getNotifications(options?: { unreadOnly?: boolean; limit?: number }) {
+  async getNotifications(options?: { unreadOnly?: boolean; limit?: number; userAddress?: string }) {
     const params = new URLSearchParams()
     if (options?.unreadOnly) params.append("unreadOnly", "true")
     if (options?.limit) params.append("limit", options.limit.toString())
+    if (options?.userAddress) params.append("userAddress", options.userAddress)
 
     const queryString = params.toString()
     return this.request(`/notifications${queryString ? `?${queryString}` : ""}`)
@@ -142,7 +147,7 @@ export const apiClient = new ApiClient()
 export function useApi() {
   return {
     sips: {
-      list: (userId?: string) => apiClient.getSIPs(userId),
+      list: (userAddress?: string) => apiClient.getSIPs(userAddress),
       create: (data: Parameters<typeof apiClient.createSIP>[0]) => apiClient.createSIP(data),
       update: (id: number, updates: Parameters<typeof apiClient.updateSIP>[1]) => apiClient.updateSIP(id, updates),
       delete: (id: number) => apiClient.deleteSIP(id),
@@ -151,7 +156,7 @@ export function useApi() {
       pools: (filters?: Parameters<typeof apiClient.getYieldPools>[0]) => apiClient.getYieldPools(filters),
     },
     portfolio: {
-      get: (userId?: string) => apiClient.getPortfolio(userId),
+      get: (userAddress?: string) => apiClient.getPortfolio(userAddress),
     },
     notifications: {
       list: (options?: Parameters<typeof apiClient.getNotifications>[0]) => apiClient.getNotifications(options),

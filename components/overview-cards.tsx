@@ -2,9 +2,9 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { TrendingUp, TrendingDown, DollarSign, Zap, Lock } from "lucide-react"
+import { TrendingUp, TrendingDown, DollarSign, Zap, Lock, Loader2 } from "lucide-react"
 import { useState, useEffect } from "react"
-import { tempDB } from "@/lib/temp-db-executor"
+import { useAccount } from "wagmi"
 
 type ChangeType = "positive" | "negative" | "neutral"
 
@@ -12,7 +12,7 @@ export function OverviewCards() {
   const [stats, setStats] = useState([
     {
       title: "Total Portfolio Value",
-      value: "$0.00",
+      value: "0.00",
       change: "+0%",
       changeType: "neutral" as ChangeType,
       icon: DollarSign,
@@ -28,7 +28,7 @@ export function OverviewCards() {
     },
     {
       title: "Yield Earned",
-      value: "$0.00",
+      value: "0.00",
       change: "+0%",
       changeType: "neutral" as ChangeType,
       icon: Zap,
@@ -36,65 +36,64 @@ export function OverviewCards() {
     },
     {
       title: "Emergency Funds",
-      value: "$0.00",
+      value: "0.00",
       change: "Not locked",
       changeType: "neutral" as ChangeType,
       icon: Lock,
       description: "Secured in emergency vault",
     },
   ])
+  const [loading, setLoading] = useState(true)
+  const { address, isConnected } = useAccount()
 
   useEffect(() => {
-    loadRealData()
-  }, [])
+    if (isConnected && address) {
+      loadRealData()
+    } else {
+      setLoading(false)
+    }
+  }, [isConnected, address])
 
   const loadRealData = async () => {
     try {
-      // Get real data from database
-      const data = tempDB.getAllData()
-      const demoUser = data.users[0] // For demo, use first user
+      setLoading(true)
+      // Fetch real data from API with user address
+      const response = await fetch(`/api/portfolio?userAddress=${address}`)
+      const data = await response.json()
       
-      if (demoUser) {
-        const userSIPs = data.sips.filter(sip => sip.user_address === demoUser.wallet_address)
-        const userYield = data.yield_history.filter(yieldRecord => yieldRecord.user_address === demoUser.wallet_address)
-        const userVault = data.vault_locks.filter(vault => vault.user_address === demoUser.wallet_address)
-        
-        // Calculate real values
-        const totalInvested = parseFloat(demoUser.stats.total_invested)
-        const totalEarned = parseFloat(demoUser.stats.total_earned)
-        const totalPortfolio = totalInvested + totalEarned
-        const vaultBalance = parseFloat(demoUser.stats.vault_balance)
+      if (data.success) {
+        const portfolio = data.data
         
         setStats([
           {
             title: "Total Portfolio Value",
-            value: `$${totalPortfolio.toLocaleString()}`,
-            change: totalEarned > 0 ? `+${((totalEarned/totalInvested)*100).toFixed(1)}%` : "+0%",
-            changeType: totalEarned > 0 ? "positive" : "neutral",
+            value: `${portfolio.totalValue.toFixed(2)}`,
+            change: `${portfolio.returnPercentage > 0 ? '+' : ''}${portfolio.returnPercentage.toFixed(1)}%`,
+            changeType: portfolio.returnPercentage > 0 ? "positive" : portfolio.returnPercentage < 0 ? "negative" : "neutral",
             icon: DollarSign,
             description: "Across all SIPs and yield pools",
           },
           {
             title: "Active SIPs",
-            value: userSIPs.length.toString(),
-            change: `${userSIPs.length} running`,
-            changeType: userSIPs.length > 0 ? "positive" : "neutral",
+            value: portfolio.activeSIPs.toString(),
+            change: `${portfolio.activeSIPs} running`,
+            changeType: portfolio.activeSIPs > 0 ? "positive" : "neutral",
             icon: TrendingUp,
             description: "Automated investment plans",
           },
           {
             title: "Yield Earned",
-            value: `$${totalEarned.toLocaleString()}`,
-            change: userYield.length > 0 ? `+${userYield.length} rewards` : "+0%",
-            changeType: totalEarned > 0 ? "positive" : "neutral",
+            value: `${portfolio.totalReturn.toFixed(2)}`,
+            change: `${portfolio.totalReturn > 0 ? 'Earning' : 'No yield'}`,
+            changeType: portfolio.totalReturn > 0 ? "positive" : "neutral",
             icon: Zap,
             description: "Total yield from optimization",
           },
           {
             title: "Emergency Funds",
-            value: `$${vaultBalance.toLocaleString()}`,
-            change: userVault.length > 0 ? "Locked" : "Available",
-            changeType: userVault.length > 0 ? "neutral" : "positive",
+            value: `${portfolio.totalLocked.toFixed(2)}`,
+            change: portfolio.totalLocked > 0 ? "Locked" : "Available",
+            changeType: portfolio.totalLocked > 0 ? "neutral" : "positive",
             icon: Lock,
             description: "Secured in emergency vault",
           },
@@ -102,7 +101,34 @@ export function OverviewCards() {
       }
     } catch (error) {
       console.error("Failed to load real data:", error)
+      // Keep default values on error
+    } finally {
+      setLoading(false)
     }
+  }
+
+  if (!isConnected) {
+    return (
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {stats.map((stat) => (
+          <Card key={stat.title} className="relative overflow-hidden">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">{stat.title}</CardTitle>
+              <stat.icon className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">--</div>
+              <div className="flex items-center space-x-2 mt-1">
+                <Badge variant="secondary" className="text-xs">
+                  Connect Wallet
+                </Badge>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">Connect to view data</p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    )
   }
 
   return (
@@ -114,7 +140,9 @@ export function OverviewCards() {
             <stat.icon className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stat.value}</div>
+            <div className="text-2xl font-bold">
+              {loading ? <Loader2 className="h-6 w-6 animate-spin" /> : stat.value}
+            </div>
             <div className="flex items-center space-x-2 mt-1">
               <Badge
                 variant={
@@ -128,7 +156,7 @@ export function OverviewCards() {
               >
                 {stat.changeType === "positive" && <TrendingUp className="h-3 w-3 mr-1" />}
                 {stat.changeType === "negative" && <TrendingDown className="h-3 w-3 mr-1" />}
-                {stat.change}
+                {loading ? <Loader2 className="h-3 w-3 animate-spin" /> : stat.change}
               </Badge>
             </div>
             <p className="text-xs text-muted-foreground mt-1">{stat.description}</p>

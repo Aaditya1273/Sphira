@@ -70,6 +70,74 @@ interface SIPRecord {
   apy_target: number
 }
 
+interface YieldRecord {
+  id: number
+  user_address: string
+  token_address: string
+  pool_id: number
+  amount: string
+  apy: number
+  timestamp: string
+  tx_hash: string
+  strategy: string
+}
+
+interface VaultLockRecord {
+  id: number
+  lock_id: number
+  user_address: string
+  token_address: string
+  amount: string
+  lock_duration: number
+  reason: string
+  status: 'ACTIVE' | 'UNLOCKED' | 'EXPIRED'
+  created_at: string
+  unlock_time: string
+  tx_hash: string
+  interest_earned: string
+}
+
+interface AnalyticsRecord {
+  id: number
+  event_type: string
+  user_address: string | null
+  data: string
+  timestamp: string
+  session_id: string
+}
+
+interface ChatRecord {
+  id: number
+  user_address: string
+  message: string
+  response: string
+  command: string
+  timestamp: string
+  satisfaction_rating: number
+}
+
+interface PortfolioSnapshot {
+  id: number
+  user_address: string
+  total_value: string
+  breakdown: {
+    sips: string
+    yield: string
+    vault: string
+  }
+  timestamp: string
+}
+
+interface NotificationRecord {
+  id: number
+  user_address: string
+  type: string
+  title: string
+  message: string
+  read: boolean
+  created_at: string
+}
+
 // 🎨 Beautiful Demo Data Generator
 const generateDemoData = (): DatabaseSchema => {
   const now = new Date().toISOString()

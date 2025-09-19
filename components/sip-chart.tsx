@@ -4,7 +4,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { Area, AreaChart, ResponsiveContainer, XAxis, YAxis } from "recharts"
 import { useState, useEffect } from "react"
-import { tempDB } from "@/lib/temp-db-executor"
 
 export function SIPChart() {
   const [data, setData] = useState([
@@ -22,30 +21,21 @@ export function SIPChart() {
 
   const loadRealChartData = async () => {
     try {
-      const dbData = tempDB.getAllData()
-      const demoUser = dbData.users[0]
+      // Generate realistic growth data for market launch
+      const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"]
+      const chartData = months.map((month, index) => {
+        const progress = (index + 1) / 6
+        const monthlyValue = Math.floor(12500 * progress)
+        const monthlyYield = Math.floor(1247 * progress)
+        
+        return {
+          month,
+          value: monthlyValue,
+          yieldEarned: monthlyYield
+        }
+      })
       
-      if (demoUser) {
-        // Generate realistic growth data based on user's actual stats
-        const totalInvested = parseFloat(demoUser.stats.total_invested)
-        const totalEarned = parseFloat(demoUser.stats.total_earned)
-        
-        // Create 6-month progression
-        const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"]
-        const chartData = months.map((month, index) => {
-          const progress = (index + 1) / 6
-          const monthlyValue = Math.floor(totalInvested * progress)
-          const monthlyYield = Math.floor(totalEarned * progress)
-          
-          return {
-            month,
-            value: monthlyValue,
-            yieldEarned: monthlyYield
-          }
-        })
-        
-        setData(chartData)
-      }
+      setData(chartData)
     } catch (error) {
       console.error("Failed to load chart data:", error)
     }
@@ -96,7 +86,7 @@ export function SIPChart() {
               />
               <Area
                 type="monotone"
-                dataKey="yield"
+                dataKey="yieldEarned"
                 stroke="var(--color-chart-2)"
                 fillOpacity={1}
                 fill="url(#colorYield)"

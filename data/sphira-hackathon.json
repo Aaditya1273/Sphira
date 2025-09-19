@@ -1,8 +1,8 @@
 {
   "metadata": {
     "version": "2.0.0",
-    "created": "2025-09-19T15:31:20.764Z",
-    "lastUpdated": "2025-09-19T15:31:20.765Z",
+    "created": "2025-09-19T16:48:10.089Z",
+    "lastUpdated": "2025-09-19T16:48:10.090Z",
     "totalUsers": 3,
     "totalTransactions": 25
   },
@@ -10,8 +10,8 @@
     {
       "id": 1,
       "wallet_address": "0x742d35Cc6634C0532925a3b8D4C9db96590c6C87",
-      "created_at": "2025-08-05T15:31:20.765Z",
-      "last_active": "2025-09-19T15:31:20.765Z",
+      "created_at": "2025-08-05T16:48:10.090Z",
+      "last_active": "2025-09-19T16:48:10.090Z",
       "preferences": {
         "theme": "dark",
         "currency": "USD",
@@ -28,8 +28,8 @@
     {
       "id": 2,
       "wallet_address": "0x8ba1f109551bD432803012645Hac136c22C177e9",
-      "created_at": "2025-08-20T15:31:20.765Z",
-      "last_active": "2025-09-19T13:31:20.765Z",
+      "created_at": "2025-08-20T16:48:10.090Z",
+      "last_active": "2025-09-19T14:48:10.090Z",
       "preferences": {
         "theme": "light",
         "currency": "EUR",
@@ -46,8 +46,8 @@
     {
       "id": 3,
       "wallet_address": "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
-      "created_at": "2025-09-04T15:31:20.765Z",
-      "last_active": "2025-09-19T15:01:20.765Z",
+      "created_at": "2025-09-04T16:48:10.090Z",
+      "last_active": "2025-09-19T16:18:10.090Z",
       "preferences": {
         "theme": "system",
         "currency": "USD",
@@ -72,8 +72,8 @@
       "amount": "1000.00",
       "frequency": "WEEKLY",
       "status": "ACTIVE",
-      "created_at": "2025-08-08T15:31:20.765Z",
-      "next_execution": "2025-09-22T15:31:20.765Z",
+      "created_at": "2025-08-08T16:48:10.090Z",
+      "next_execution": "2025-09-22T16:48:10.090Z",
       "total_deposits": "6000.00",
       "execution_count": 6,
       "blockchain_tx_hash": "0xabc123def456789012345678901234567890abcd",
@@ -88,8 +88,8 @@
       "amount": "0.25",
       "frequency": "DAILY",
       "status": "ACTIVE",
-      "created_at": "2025-08-15T15:31:20.765Z",
-      "next_execution": "2025-09-19T23:31:20.765Z",
+      "created_at": "2025-08-15T16:48:10.090Z",
+      "next_execution": "2025-09-20T00:48:10.090Z",
       "total_deposits": "8.75",
       "execution_count": 35,
       "blockchain_tx_hash": "0xdef456abc789012345678901234567890abcdef1",
@@ -104,8 +104,8 @@
       "amount": "2000.00",
       "frequency": "MONTHLY",
       "status": "ACTIVE",
-      "created_at": "2025-06-21T15:31:20.765Z",
-      "next_execution": "2025-10-04T15:31:20.765Z",
+      "created_at": "2025-06-21T16:48:10.090Z",
+      "next_execution": "2025-10-04T16:48:10.090Z",
       "total_deposits": "6000.00",
       "execution_count": 3,
       "blockchain_tx_hash": "0xghi789jkl012345678901234567890ghijkl234",
@@ -120,8 +120,8 @@
       "amount": "750.00",
       "frequency": "WEEKLY",
       "status": "ACTIVE",
-      "created_at": "2025-08-22T15:31:20.765Z",
-      "next_execution": "2025-09-24T15:31:20.765Z",
+      "created_at": "2025-08-22T16:48:10.090Z",
+      "next_execution": "2025-09-24T16:48:10.090Z",
       "total_deposits": "3000.00",
       "execution_count": 4,
       "blockchain_tx_hash": "0xmno345pqr678901234567890123456789mnopqr5",
@@ -136,7 +136,7 @@
       "pool_id": 1,
       "amount": "127.45",
       "apy": 12.8,
-      "timestamp": "2025-09-19T11:31:20.765Z",
+      "timestamp": "2025-09-19T12:48:10.090Z",
       "tx_hash": "0xyield123456789abcdef",
       "strategy": "Liquidity Pool Staking"
     },
@@ -147,7 +147,7 @@
       "pool_id": 2,
       "amount": "0.089",
       "apy": 9.2,
-      "timestamp": "2025-09-19T09:31:20.765Z",
+      "timestamp": "2025-09-19T10:48:10.090Z",
       "tx_hash": "0xyield234567890bcdef1",
       "strategy": "Ethereum Staking"
     },
@@ -158,7 +158,7 @@
       "pool_id": 1,
       "amount": "89.23",
       "apy": 11.7,
-      "timestamp": "2025-09-19T13:31:20.765Z",
+      "timestamp": "2025-09-19T14:48:10.090Z",
       "tx_hash": "0xyield345678901cdef12",
       "strategy": "Liquidity Pool Staking"
     }
@@ -173,8 +173,8 @@
       "lock_duration": 7776000,
       "reason": "Long-term emergency fund",
       "status": "ACTIVE",
-      "created_at": "2025-08-20T15:31:20.765Z",
-      "unlock_time": "2025-11-18T15:31:20.765Z",
+      "created_at": "2025-08-20T16:48:10.090Z",
+      "unlock_time": "2025-11-18T16:48:10.090Z",
       "tx_hash": "0xlock123456789abcdef0",
       "interest_earned": "625.50"
     },
@@ -187,8 +187,8 @@
       "lock_duration": 2592000,
       "reason": "Emergency fund protection",
       "status": "ACTIVE",
-      "created_at": "2025-09-04T15:31:20.765Z",
-      "unlock_time": "2025-10-04T15:31:20.765Z",
+      "created_at": "2025-09-04T16:48:10.090Z",
+      "unlock_time": "2025-10-04T16:48:10.090Z",
       "tx_hash": "0xlock234567890bcdef01",
       "interest_earned": "156.25"
     }
@@ -199,7 +199,7 @@
       "event_type": "sip_created",
       "user_address": "0x742d35Cc6634C0532925a3b8D4C9db96590c6C87",
       "data": "{\"amount\":\"1000\",\"token\":\"USDC\",\"frequency\":\"WEEKLY\"}",
-      "timestamp": "2025-08-08T15:31:20.765Z",
+      "timestamp": "2025-08-08T16:48:10.090Z",
       "session_id": "sess_abc123def"
     },
     {
@@ -207,7 +207,7 @@
       "event_type": "yield_earned",
       "user_address": "0x742d35Cc6634C0532925a3b8D4C9db96590c6C87",
       "data": "{\"amount\":\"127.45\",\"token\":\"USDC\",\"apy\":12.8}",
-      "timestamp": "2025-09-19T11:31:20.765Z",
+      "timestamp": "2025-09-19T12:48:10.090Z",
       "session_id": "sess_def456ghi"
     },
     {
@@ -215,7 +215,7 @@
       "event_type": "vault_locked",
       "user_address": "0x742d35Cc6634C0532925a3b8D4C9db96590c6C87",
       "data": "{\"amount\":\"50000\",\"duration\":90,\"reason\":\"emergency\"}",
-      "timestamp": "2025-08-20T15:31:20.765Z",
+      "timestamp": "2025-08-20T16:48:10.090Z",
       "session_id": "sess_ghi789jkl"
     }
   ],
@@ -226,7 +226,7 @@
       "message": "/portfolio",
       "response": "Portfolio Summary: Total Value: $63,747.89 | Active SIPs: 4 | Vault Balance: $50,000 | Total Earned: $1,247.89",
       "command": "portfolio",
-      "timestamp": "2025-09-19T13:31:20.765Z",
+      "timestamp": "2025-09-19T14:48:10.090Z",
       "satisfaction_rating": 5
     },
     {
@@ -235,7 +235,7 @@
       "message": "/sip status",
       "response": "SIP Status: 4 active SIPs | Next execution: ETH SIP in 8 hours | Weekly USDC SIP in 3 days",
       "command": "sip_status",
-      "timestamp": "2025-09-19T15:01:20.765Z",
+      "timestamp": "2025-09-19T16:18:10.090Z",
       "satisfaction_rating": 4
     },
     {
@@ -244,7 +244,7 @@
       "message": "How is my yield performance?",
       "response": "Your yield performance is excellent! Current APY: 11.7% | Total earned this month: $89.23",
       "command": null,
-      "timestamp": "2025-09-19T14:46:20.765Z",
+      "timestamp": "2025-09-19T16:03:10.090Z",
       "satisfaction_rating": 5
     }
   ],
@@ -258,7 +258,7 @@
         "yield": "1247.89",
         "vault": "50000.00"
       },
-      "timestamp": "2025-09-19T15:31:20.765Z"
+      "timestamp": "2025-09-19T16:48:10.090Z"
     },
     {
       "id": 2,
@@ -269,7 +269,7 @@
         "yield": "892.34",
         "vault": "25000.00"
       },
-      "timestamp": "2025-09-19T15:31:20.765Z"
+      "timestamp": "2025-09-19T16:48:10.090Z"
     }
   ],
   "notifications": [
@@ -280,7 +280,7 @@
       "title": "SIP Executed Successfully",
       "message": "Your daily ETH SIP of 0.25 ETH has been executed successfully.",
       "read": false,
-      "created_at": "2025-09-19T07:31:20.765Z"
+      "created_at": "2025-09-19T08:48:10.090Z"
     },
     {
       "id": 2,
@@ -289,7 +289,7 @@
       "title": "Yield Earned",
       "message": "You earned $127.45 USDC from liquidity pool staking (12.8% APY).",
       "read": false,
-      "created_at": "2025-09-19T11:31:20.765Z"
+      "created_at": "2025-09-19T12:48:10.090Z"
     },
     {
       "id": 3,
@@ -298,7 +298,7 @@
       "title": "Yield Earned",
       "message": "You earned $89.23 USDC from liquidity pool staking (11.7% APY).",
       "read": true,
-      "created_at": "2025-09-19T13:31:20.765Z"
+      "created_at": "2025-09-19T14:48:10.090Z"
     }
   ]
 }

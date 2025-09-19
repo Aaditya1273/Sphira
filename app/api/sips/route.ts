@@ -1,44 +1,18 @@
 import { type NextRequest, NextResponse } from "next/server"
-
-// Mock database - in production, use a real database
-const mockSIPs = [
-  {
-    id: 1,
-    userId: "user1",
-    name: "USDC Growth Plan",
-    token: "USDC",
-    amount: 500,
-    frequency: "weekly",
-    status: "active",
-    totalInvested: 15000,
-    targetAmount: 20000,
-    nextExecution: "2024-01-15T10:00:00Z",
-    apy: 8.5,
-    createdAt: "2024-01-01T00:00:00Z",
-  },
-  {
-    id: 2,
-    userId: "user1",
-    name: "ETH Accumulation",
-    token: "ETH",
-    amount: 0.5,
-    frequency: "biweekly",
-    status: "active",
-    totalInvested: 12000,
-    targetAmount: 20000,
-    nextExecution: "2024-01-18T10:00:00Z",
-    apy: 12.3,
-    createdAt: "2024-01-01T00:00:00Z",
-  },
-]
+import { blockchainService } from "@/lib/blockchain-service"
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
-    const userId = searchParams.get("userId") || "user1"
+    const userAddress = searchParams.get("userAddress")
 
-    // Filter SIPs by user
-    const userSIPs = mockSIPs.filter((sip) => sip.userId === userId)
+    if (!userAddress) {
+      return NextResponse.json({ success: false, error: "User address required" }, { status: 400 })
+    }
+
+    // Get user SIPs from temporary storage (in production, this would be from blockchain)
+    const allSIPs = JSON.parse((global as any).tempSIPStorage || '{}')
+    const userSIPs = allSIPs[userAddress] || []
 
     return NextResponse.json({
       success: true,
@@ -54,45 +28,49 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { name, token, amount, frequency, duration, penalty, reason, userId = "user1" } = body
+    const { name, token, amount, frequency, userAddress, duration, penalty = 2, reason } = body
 
     // Validate required fields
-    if (!name || !token || !amount || !frequency) {
+    if (!name || !token || !amount || !frequency || !userAddress) {
       return NextResponse.json({ success: false, error: "Missing required fields" }, { status: 400 })
     }
 
-    // Create new SIP
+    // For now, create a mock SIP entry (in production, this would interact with blockchain)
     const newSIP = {
-      id: mockSIPs.length + 1,
-      userId,
-      name,
-      token,
-      amount: Number.parseFloat(amount),
-      frequency,
-      status: "active",
-      totalInvested: 0,
-      targetAmount: Number.parseFloat(amount) * (duration || 12),
-      nextExecution: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // Tomorrow
-      apy: 8.5, // Default APY
-      penalty: Number.parseFloat(penalty) || 2,
-      reason,
-      createdAt: new Date().toISOString(),
+      id: Math.floor(Math.random() * 10000),
+      name: name,
+      token_symbol: token.toUpperCase(),
+      amount: parseFloat(amount),
+      frequency: frequency,
+      duration: duration ? parseInt(duration) : null,
+      penalty: parseFloat(penalty),
+      reason: reason || "",
+      user_address: userAddress,
+      status: "Active",
+      total_deposits: 0,
+      execution_count: 0,
+      apy_target: 8.5, // Mock APY
+      next_execution: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // Tomorrow
+      created_at: new Date().toISOString()
     }
 
-    mockSIPs.push(newSIP)
-
-    // In production, you would:
-    // 1. Save to database
-    // 2. Interact with smart contract
-    // 3. Send notification
+    // Store in temporary storage (in production, this would be blockchain + database)
+    const existingSIPs = JSON.parse((global as any).tempSIPStorage || '{}')
+    if (!existingSIPs[userAddress]) {
+      existingSIPs[userAddress] = []
+    }
+    existingSIPs[userAddress].push(newSIP)
+    ;(global as any).tempSIPStorage = JSON.stringify(existingSIPs)
 
     return NextResponse.json({
       success: true,
       data: newSIP,
-      message: "SIP created successfully",
+      message: "SIP created successfully!",
     })
   } catch (error) {
     console.error("Error creating SIP:", error)
     return NextResponse.json({ success: false, error: "Failed to create SIP" }, { status: 500 })
   }
 }
+
+
