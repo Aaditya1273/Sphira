@@ -84,28 +84,28 @@ Sphira transforms how people invest in DeFi by combining **Systematic Investment
 
 #### 💬 **Conversational DeFi Interface**
 - **Natural Language Commands**: `/startSIP 100 USDC weekly`, `/optimize portfolio`
-- **AI Assistant**: Smart support formedecisiond platform navigation
-- * ⚡ **Technicnds**: Hands-freanagement (coming sn)
-- **Sicatialerts for opportunities and risks
-- ## 🔗 **Songuage Support**: 12 languages for global assibility
+- **AI Assistant**: Smart support for investment decisions and platform navigation
+- **Voice Commands**: Hands-free portfolio management (coming soon)
+- **Smart Alerts**: Proactive notifications for opportunities and risks
+- **Multi-Language Support**: 12 languages for global accessibility
+
+#### ⚡ **Somnia Blockchain Integration**
 - **Lightning Speed**: Sub-second transaction finality
-- **UltrTechnical Exc $0.001 average transaction cost
+- **Ultra-Low Fees**: $0.001 average transaction cost
 - **EVM Compatibility**: Seamless Ethereum tooling integration
-- **H🔗 **Somnia Blockchain000tegration**ity
-- **Carhtning Speed**: Sub-sementallansaction finalitckchain
- **Ultra-Low Fees**: $0.001 average tcost
-- **EVM Compcurity-First Seamless Ethereum toolin
-- **High Throughput*nt 400,000+ ultiple sety
-- **Carntrancy Protection**onmentally suve attble blockchain
+- **High Throughput**: 400,000+ TPS capacity
+- **Carbon Neutral**: Environmentally sustainable blockchain
 
-#### 🔒 gency Pause**: t Architecturers
-- **Auditeunty Program**: $10: Multiplds for sty audits by lchersg f
- **Reentrancy Pon**: Compre attack vector tion
-- ** 📱 **Usentrol**: RoleInnovationmissions and multi-sgovernance
-- **Mobile-Fi Pause**: CircNativreakerse appcritical se in wprotection
-- **Bug Bounht Themes***: $100K+ rewards forace prity researrs
+#### 🔒 **Security-First Architecture**
+- **Audited Contracts**: Multiple security audits by leading firms
+- **Reentrancy Protection**: Comprehensive attack vector mitigation
+- **Access Control**: Role-based permissions and multi-sig governance
+- **Emergency Pause**: Circuit breakers for critical system protection
+- **Bug Bounty Program**: $100K+ rewards for security researchers
 
----
+#### 📱 **User Experience Innovation**
+- **Mobile-Native**: Progressive web app with offline capabilities
+- **Dark/Light Themes**: Customizable interface preferences
 - **Accessibility**: WCAG 2.1 AA compliant for inclusive design
 
 ---
@@ -158,128 +158,154 @@ Sphira transforms how people invest in DeFi by combining **Systematic Investment
 
 ### 🔧 **Smart Contract Architecture**
 
-#### ger.sol** - Core Investment Lo
-olidity
-cIPManager {
+#### **SIPManager.sol** - Core Investment Logic
+```solidity
+contract SIPManager {
     struct SIP {
-        ass user;        Investor wallet
-   ress token;  Invest token
- int256 amount;   -deposit amount
-       Frequency f// Investment schedule
-        uint2rtTime; 
-### Yield Ot256 totalDeposits;ptimizatulative invion
-    Stat       // Active/Paused/Cancelled
+        address user;           // Investor wallet
+        address token;          // Investment token
+        uint256 amount;         // Per-deposit amount
+        Frequency frequency;    // Investment schedule
+        uint256 startTime;      // SIP start date
+        uint256 totalDeposits;  // Cumulative investments
+        Status status;          // Active/Paused/Cancelled
     }
     
-  
-    // ✅ creThe YieldRounitialize ter automament plan
-    /tic exeally distributecess scheduls your funds across the best-performing Somnia DeFi pools:
-- **Liqui pauseSIP() - Temporary haltdity Pools**
-    // ❌ cancelS: Automaermanent termted market makers
-- **Le 🚨 earlyWithdrawal(nding Prgency fund access
-otocols**: Compound-style lending
-- **Staking Rewards**: Native SOM staking
-
-#### 🎯 **YieldRouter.sol** - AI-Powered Optimiz
-##`solidity
-con# Ect YimerRouter {
- ge struct Poncy Fund Lock
-     address poolAddress;    // DeFi protocol address
-        uint256 currentAPY;     // Real-tim
-Protect uint256 riskScore;   your fun10 risk assessmds with the LockVault:
-1.      uint256 maxCapNaity;    // Pool vigate to Emergency Vault
-2. Loc  book funds with custom unl Pool status
-    }
-    
-    //ock conditnctions:
-    // 💰 ioposit(nscation
-  -driven optimizn
-    // 🌾 hartYield() - Compo
-3. Mu/ 📈 getOptimalPools() - Best opportunilti-sig approval required for emergency unlocks
-lculateRisk() - Rment
+    // ✅ createSIP() - Initialize investment plan
+    // ⏰ executeSIP() - Process scheduled deposits
+    // ⏸️ pauseSIP() - Temporary halt
+    // ❌ cancelSIP() - Permanent termination
+    // 🚨 earlyWithdrawal() - Emergency fund access
 }
 ```
 
- **LockVau* - Emergency PSys
-#``solidity
-c# 🧪 Testinglt {
-    struct Lock {
-     address user;           // nd own
-        uint256 amot;         /Locked amount
-        uint256     // Scheduled unlock
-     LockStatus status; / Lock state
-        stri;          
+#### 🎯 **YieldRouter.sol** - AI-Powered Optimization
+The YieldRouter automatically distributes your funds across the best-performing Somnia DeFi pools:
+- **Liquidity Pools**: Automated market makers
+- **Lending Protocols**: Compound-style lending
+- **Staking Rewards**: Native SOM staking
 
+```solidity
+contract YieldRouter {
+    struct Pool {
+        address poolAddress;    // DeFi protocol address
+        uint256 currentAPY;     // Real-time yield
+        uint256 riskScore;      // 1-10 risk assessment
+        uint256 maxCapacity;    // Pool capacity limit
+        bool isActive;          // Pool status
+    }
     
-    strucroposal
-### Smartint256 lock Contra     // Tct Tests
-\`\     address propose`\`bash  // Pror
-        uinrovals;      // Vote count
-      bool exec        // Execution stat
+    // Key functions:
+    // 💰 deposit() - Smart allocation
+    // 🤖 rebalance() - AI-driven optimization
+    // 🌾 harvestYield() - Compound returns
+    // 📈 getOptimalPools() - Best opportunities
+    // 🎯 calculateRisk() - Risk assessment
+}
+```
+
+#### 🛡️ **LockVault.sol** - Emergency Protection System
+Protect your funds with the LockVault:
+1. Navigate to Emergency Vault
+2. Lock funds with custom unlock conditions
+3. Multi-sig approval required for emergency unlocks
+
+```solidity
+contract LockVault {
+    struct Lock {
+        address user;           // Fund owner
+        uint256 amount;         // Locked amount
+        uint256 unlockTime;     // Scheduled unlock
+        LockStatus status;      // Lock state
+        string reason;          // Lock purpose
+    }
+    
+    struct EmergencyProposal {
+        uint256 lockId;         // Target lock
+        address proposer;       // Proposal creator
+        uint256 approvals;      // Vote count
+        bool executed;          // Execution status
+    }
+    
+    // 🔒 Key Functions:
+    // lockFunds() - Secure emergency funds
+    // createEmergencyProposal() - Governance voting
+    // executeEmergencyUnlock() - Multi-sig release
+    // withdrawFunds() - Time-based unlock
+}
+## 🧪 **Testing & Quality Assurance**
+
+### Smart Contract Tests
+```bash
 cd contracts
-n   
-    // 🔒 Key Functiopm test
-\`\`\`) - Secure emergency funds
-    createEmergencyProposal() - Governance vo
-ecuteEmergencyUnlock() - Multi-sig release
-    drawFunds() - Time-based unl
+npm test
+```
+
 ### Frontend Tests
-```\`\`\`bash
+```bash
 npm run test
-\`\`\`
+```
 
 ### Integration Tests
-\`\`\`bash
+```bash
 npm run test:integration
-\`\`\`
+```
 
 ### Security Audit
-\`\`\`bash
+```bash
 cd contracts
 npm run audit
-\`\`\`
+```
 
-## 🚀 Deployment
+## 🚀 **Quick Start & Deployment**
+
+### Local Development
+```bash
+git clone https://github.com/your-org/sphira-defi-platform
+cd sphira-defi-platform
+npm install
+npm run dev
+```
 
 ### Testnet Deployment
-\`\`\`bash
+```bash
 npm run deploy:testnet
-\`\`\`
+```
 
 ### Mainnet Deployment
-\`\`\`bash
+```bash
 npm run deploy:mainnet
-\`\`\`
+```
 
 ### Docker Deployment
-\`\`\`bash
+```bash
 docker-compose up -d
-\`\`\`
+```
 
-## 📊 Demo Script
+## 📊 **Live Demo Walkthrough**
 
-### 1. Dashboard Overview
-- View portfolio balance: $10,000
+### 1. **Dashboard Overview**
+- Portfolio balance: $10,000
 - Active SIPs: 3 running
 - Total yield earned: $250 (2.5% APY)
 - Emergency funds locked: $2,000
 
-### 2. Create SIP via Chat
-\`\`\`
+### 2. **Create SIP via Chat**
+```
 User: /startSIP 50 USDC weekly
 Bot: ✅ SIP created! 50 USDC weekly for 12 weeks. Total: $600
-\`\`\`
+```
 
-### 3. Yield Optimization
-- View current allocations across 5 pools
+### 3. **AI Yield Optimization**
+- Current allocations across 5 pools
 - Best performing: Somnia-USDC LP (15% APY)
 - Auto-rebalancing every 24 hours
 
-### 4. Emergency Lock Demo
-\`\`\`
+### 4. **Emergency Vault Demo**
+```
 User: /lockFunds 1000 USDC
 Bot: 🔒 Emergency lock created. Requires 3/5 multi-sig for unlock.
-\`\`\`
+```
 
 ## 🔧 API Documentation
 
