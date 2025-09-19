@@ -99,7 +99,8 @@
     "web3": "^4.16.0",
     "zod": "3.25.67",
     "tailwindcss": "^4.1.9",
-    "postcss": "^8.5"
+    "postcss": "^8.5",
+    "@tailwindcss/postcss": "^4.1.9"
   },
   "devDependencies": {
     "@types/node": "^22",
