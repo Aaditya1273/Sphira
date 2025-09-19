@@ -351,21 +351,31 @@ export const contractUtils = {
       const contract = new web3.eth.Contract(SIP_MANAGER_ABI as any, CONTRACT_ADDRESSES.SIP_MANAGER)
       const sipIds = await contract.methods.getUserSIPs(userAddress).call()
       
+      // Type guard to ensure sipIds is an array
+      if (!Array.isArray(sipIds) || sipIds.length === 0) {
+        return []
+      }
+      
       const sips = await Promise.all(
         sipIds.map(async (id: any) => {
-          const sip = await contract.methods.getSIP(id).call()
+          const sipResult = await contract.methods.getSIP(id).call()
+          // Type guard to ensure sip is an object with required properties
+          if (!sipResult || typeof sipResult !== 'object') {
+            return null
+          }
+          const sip = sipResult as any
           return {
             id: id,
-            user: sip.user,
-            token: sip.token,
-            amount: web3.utils.fromWei(sip.amount, 'ether'),
-            frequency: sip.frequency,
-            status: sip.status,
-            totalDeposits: web3.utils.fromWei(sip.totalDeposits, 'ether'),
-            executionCount: sip.executionCount
+            user: sip.user || '',
+            token: sip.token || '',
+            amount: sip.amount ? web3.utils.fromWei(sip.amount, 'ether') : '0',
+            frequency: sip.frequency || 0,
+            status: sip.status || 0,
+            totalDeposits: sip.totalDeposits ? web3.utils.fromWei(sip.totalDeposits, 'ether') : '0',
+            executionCount: sip.executionCount || 0
           }
         })
-      )
+      ).then(results => results.filter(sip => sip !== null))
       
       return sips
     } catch (error) {
@@ -480,19 +490,29 @@ export const contractUtils = {
       const contract = new web3.eth.Contract(LOCK_VAULT_ABI as any, CONTRACT_ADDRESSES.LOCK_VAULT)
       const lockIds = await contract.methods.getUserLocks(userAddress).call()
       
+      // Type guard to ensure lockIds is an array
+      if (!Array.isArray(lockIds) || lockIds.length === 0) {
+        return []
+      }
+      
       const locks = await Promise.all(
         lockIds.map(async (id: any) => {
-          const lock = await contract.methods.getLock(id).call()
+          const lockResult = await contract.methods.getLock(id).call()
+          // Type guard to ensure lock is an object with required properties
+          if (!lockResult || typeof lockResult !== 'object') {
+            return null
+          }
+          const lock = lockResult as any
           return {
             id: id,
-            user: lock.user,
-            token: lock.token,
-            amount: web3.utils.fromWei(lock.amount, 'ether'),
-            unlockTime: lock.unlockTime,
-            status: lock.status
+            user: lock.user || '',
+            token: lock.token || '',
+            amount: lock.amount ? web3.utils.fromWei(lock.amount, 'ether') : '0',
+            unlockTime: lock.unlockTime || 0,
+            status: lock.status || 0
           }
         })
-      )
+      ).then(results => results.filter(lock => lock !== null))
       
       return locks
     } catch (error) {
