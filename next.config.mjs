@@ -6,18 +6,15 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  images: {
-    unoptimized: true,
-  },
-  compiler: {
-    removeConsole: process.env.NODE_ENV === 'production',
-  },
-  experimental: {
-    optimizeCss: true,
-    optimizePackageImports: ['@rainbow-me/rainbowkit', 'wagmi', 'viem'],
-  },
+  // Fix path resolution for Netlify
   webpack: (config, { dev, isServer }) => {
-    // Optimize for development
+    // Fix module resolution
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@': require('path').resolve(__dirname),
+    }
+    
+    // Existing webpack config
     if (dev) {
       config.watchOptions = {
         poll: 1000,
@@ -25,7 +22,6 @@ const nextConfig = {
       }
     }
     
-    // Reduce bundle size
     config.resolve.fallback = {
       ...config.resolve.fallback,
       fs: false,
@@ -42,12 +38,21 @@ const nextConfig = {
       path: false,
     }
 
-    // Optimize externals
     if (!isServer) {
       config.externals.push('pino-pretty', 'lokijs', 'encoding')
     }
 
     return config
+  },
+  images: {
+    unoptimized: true,
+  },
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production',
+  },
+  experimental: {
+    optimizeCss: true,
+    optimizePackageImports: ['@rainbow-me/rainbowkit', 'wagmi', 'viem'],
   },
 }
 
