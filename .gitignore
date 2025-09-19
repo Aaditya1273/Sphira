@@ -1,7 +1,11 @@
-# Dependencies
-node_modules/
-.pnp
+# dependencies
+/node_modules
+/.pnp
 .pnp.js
+.yarn/install-state.gz
+
+# lockfiles (use npm for deployment)
+pnpm-lock.yaml
 
 # Testing
 coverage/
