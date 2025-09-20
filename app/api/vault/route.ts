@@ -11,14 +11,27 @@ export async function GET(request: NextRequest) {
     }
 
     // Get real vault data from blockchain
-    const locks = await blockchainService.getUserLocks(userAddress)
+    const blockchainLocks = await blockchainService.getUserLocks(userAddress)
+    
+    // Also get locks from temporary storage (for demo purposes)
+    const tempLocks = JSON.parse((global as any).tempLockStorage || '[]')
+    const userTempLocks = tempLocks.map((lock: any) => ({
+      id: lock.id,
+      token: lock.tokenAddress,
+      amount: lock.amount,
+      unlockTime: Math.floor(lock.unlockTime / 1000), // Convert to seconds
+      status: Date.now() < lock.unlockTime ? 'LOCKED' : 'UNLOCKED'
+    }))
+    
+    // Combine blockchain and temporary locks
+    const allLocks = [...blockchainLocks, ...userTempLocks]
     
     // Calculate total locked value
-    const totalLocked = locks.reduce((sum, lock) => sum + parseFloat(lock.amount), 0)
+    const totalLocked = allLocks.reduce((sum, lock) => sum + parseFloat(lock.amount), 0)
 
     const vaultData = {
       totalLocked,
-      locks: locks.map(lock => ({
+      locks: allLocks.map(lock => ({
         id: lock.id,
         token: lock.token === process.env.NEXT_PUBLIC_USDC_ADDRESS ? 'USDC' : 
                lock.token === process.env.NEXT_PUBLIC_ETH_ADDRESS ? 'ETH' : 'SOM',

@@ -42,7 +42,37 @@ const premiumDemoData = {
   analytics: [],
   chat_history: [],
   portfolio_snapshots: [],
-  notifications: []
+  notifications: [],
+  proposals: [
+    {
+      id: 1,
+      userAddress: '0x742d35Cc6634C0532925a3b8D4C9db96590c6C87',
+      title: 'Emergency Medical Expense Unlock',
+      description: 'Requesting emergency unlock of 5,000 USDC for urgent medical treatment. Hospital bills attached as proof.',
+      type: 'emergency_unlock',
+      status: 'ACTIVE',
+      votesFor: 2,
+      votesAgainst: 0,
+      requiredVotes: 3,
+      createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+      expiresAt: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
+      blockchain_tx_hash: '0xabc123def456789012345678901234567890abcd'
+    },
+    {
+      id: 2,
+      userAddress: '0x8ba1f109551bD432803012645ac136c22C177e9D',
+      title: 'Increase Multi-sig Threshold',
+      description: 'Proposal to increase required signatures from 3/5 to 4/5 for enhanced security.',
+      type: 'parameter_change',
+      status: 'ACTIVE',
+      votesFor: 1,
+      votesAgainst: 1,
+      requiredVotes: 3,
+      createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+      expiresAt: new Date(Date.now() + 6 * 24 * 60 * 60 * 1000).toISOString(),
+      blockchain_tx_hash: '0xdef456abc789012345678901234567890defabc'
+    }
+  ]
 }
 
 // Write the premium database
@@ -57,6 +87,7 @@ console.log(`   📈 Yield Records: ${premiumDemoData.yield_history.length}`)
 console.log(`   🔒 Vault Locks: ${premiumDemoData.vault_locks.length}`)
 console.log(`   📱 Notifications: ${premiumDemoData.notifications.length}`)
 console.log(`   💬 Chat History: ${premiumDemoData.chat_history.length}`)
+console.log(`   🗳️  Proposals: ${premiumDemoData.proposals.length}`)
 console.log('')
 console.log('🎯 Database Features:')
 console.log('   ⚡ Lightning-fast JSON operations')

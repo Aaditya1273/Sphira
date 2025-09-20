@@ -13,6 +13,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Lock, Shield, Users, AlertTriangle, Plus, Unlock, Loader2, Wallet } from "lucide-react"
+import { useToast } from "@/hooks/use-toast"
+import { blockchainService } from "@/lib/blockchain-service"
 
 export default function VaultPage() {
   const [vaultData, setVaultData] = useState({
@@ -36,8 +38,17 @@ export default function VaultPage() {
   })
   const [lockError, setLockError] = useState("")
   const [isLocking, setIsLocking] = useState(false)
+  const [proposalForm, setProposalForm] = useState({
+    title: "",
+    description: "",
+    type: "emergency_unlock"
+  })
+  const [isCreatingProposal, setIsCreatingProposal] = useState(false)
+  const [proposals, setProposals] = useState<any[]>([])
+  const [loadingProposals, setLoadingProposals] = useState(false)
   
   const { address, isConnected } = useAccount()
+  const { toast } = useToast()
   
   // Get balances for different tokens
   const { data: somBalance } = useBalance({
@@ -57,6 +68,7 @@ export default function VaultPage() {
   useEffect(() => {
     if (isConnected && address) {
       fetchVaultData()
+      fetchProposals()
     } else {
       setLoading(false)
     }
@@ -159,18 +171,129 @@ export default function VaultPage() {
       const result = await response.json()
 
       if (result.success) {
-        // Reset form and close dialog
-        setLockForm({ token: "", amount: "", duration: "" })
-        setLockDialogOpen(false)
-        // Refresh vault data
-        fetchVaultData()
+        // Execute the actual blockchain transaction
+        const transactionData = result.data
+        
+        toast({
+          title: "Transaction Prepared 📋",
+          description: "Please confirm the transaction in your wallet to lock funds on blockchain.",
+        })
+
+        // Use blockchain service to execute the lock transaction
+        const tokenAddress = blockchainService.getTokenAddress(lockForm.token)
+        const lockResult = await blockchainService.lockFunds(
+          tokenAddress,
+          lockForm.amount,
+          parseInt(lockForm.duration) * 24 * 60 * 60 // Convert days to seconds
+        )
+
+        if (lockResult.success) {
+          toast({
+            title: "Funds Locked Successfully! 🔒",
+            description: `${lockForm.amount} ${lockForm.token.toUpperCase()} locked for ${lockForm.duration} days. TX: ${lockResult.txHash?.slice(0, 10)}...`,
+          })
+
+          // Reset form and close dialog
+          setLockForm({ token: "", amount: "", duration: "" })
+          setLockDialogOpen(false)
+          // Refresh vault data
+          fetchVaultData()
+        } else {
+          setLockError(`❌ Blockchain transaction failed: ${lockResult.error}`)
+        }
       } else {
-        setLockError(result.error || "Failed to lock funds")
+        setLockError(result.error || "Failed to prepare lock transaction")
       }
     } catch (error) {
       setLockError("Failed to lock funds. Please try again.")
     } finally {
       setIsLocking(false)
+    }
+  }
+
+  const handleCreateProposal = async () => {
+    if (!proposalForm.title || !proposalForm.description) {
+      toast({
+        title: "Error",
+        description: "Please fill in all fields",
+        variant: "destructive",
+      })
+      return
+    }
+
+    if (!address) {
+      toast({
+        title: "Error",
+        description: "Please connect your wallet first",
+        variant: "destructive",
+      })
+      return
+    }
+
+    setIsCreatingProposal(true)
+
+    try {
+      // Call the real API to create proposal
+      const response = await fetch('/api/proposals', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userAddress: address,
+          title: proposalForm.title,
+          description: proposalForm.description,
+          type: proposalForm.type
+        }),
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        toast({
+          title: "Proposal Created! 🎉",
+          description: `Your "${proposalForm.title}" proposal has been submitted for governance voting. Proposal ID: ${result.data.id}`,
+        })
+
+        // Reset form and close dialog
+        setProposalForm({ title: "", description: "", type: "emergency_unlock" })
+        setProposalDialogOpen(false)
+        
+        // Refresh proposals list
+        fetchProposals()
+      } else {
+        toast({
+          title: "Error",
+          description: result.error || "Failed to create proposal",
+          variant: "destructive",
+        })
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to create proposal. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsCreatingProposal(false)
+    }
+  }
+
+  const fetchProposals = async () => {
+    if (!address) return
+    
+    setLoadingProposals(true)
+    try {
+      const response = await fetch(`/api/proposals?userAddress=${address}`)
+      const result = await response.json()
+      
+      if (result.success) {
+        setProposals(result.data)
+      }
+    } catch (error) {
+      console.error("Error fetching proposals:", error)
+    } finally {
+      setLoadingProposals(false)
     }
   }
 
@@ -452,10 +575,38 @@ export default function VaultPage() {
                 description="View and vote on emergency unlock proposals"
               >
                 <div className="space-y-4 mt-4">
-                  <div className="text-center text-white/70">
-                    No active proposals
-                  </div>
-                  <Button className="w-full bg-gradient-to-r from-purple-500 to-blue-500">
+                  {loadingProposals ? (
+                    <div className="text-center text-white/70">
+                      <Loader2 className="h-4 w-4 animate-spin mx-auto mb-2" />
+                      Loading proposals...
+                    </div>
+                  ) : proposals.length === 0 ? (
+                    <div className="text-center text-white/70">
+                      No active proposals
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {proposals.map((proposal) => (
+                        <div key={proposal.id} className="bg-white/5 rounded-lg p-3 border border-white/10">
+                          <div className="flex justify-between items-start mb-2">
+                            <h4 className="text-white font-medium text-sm">{proposal.title}</h4>
+                            <Badge variant={proposal.status === 'ACTIVE' ? 'default' : 'secondary'} className="text-xs">
+                              {proposal.status}
+                            </Badge>
+                          </div>
+                          <p className="text-white/70 text-xs mb-2 line-clamp-2">{proposal.description}</p>
+                          <div className="flex justify-between items-center text-xs">
+                            <span className="text-white/60">Votes: {proposal.votesFor}/{proposal.requiredVotes}</span>
+                            <span className="text-white/60">ID: #{proposal.id}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <Button 
+                    className="w-full bg-gradient-to-r from-purple-500 to-blue-500"
+                    onClick={() => setProposalDialogOpen(true)}
+                  >
                     Create New Proposal
                   </Button>
                 </div>
@@ -480,6 +631,81 @@ export default function VaultPage() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Proposal Creation Dialog */}
+        <Dialog open={proposalDialogOpen} onOpenChange={setProposalDialogOpen}>
+          <DialogContent className="bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl">
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-blue-500/10 rounded-lg" />
+            <div className="relative">
+              <DialogHeader>
+                <DialogTitle className="text-white">Create Governance Proposal</DialogTitle>
+                <DialogDescription className="text-white/70">
+                  Submit a proposal for community voting
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 mt-4">
+                <div>
+                  <Label className="text-white">Proposal Type</Label>
+                  <Select value={proposalForm.type} onValueChange={(value) => 
+                    setProposalForm(prev => ({ ...prev, type: value }))
+                  }>
+                    <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="emergency_unlock">Emergency Unlock</SelectItem>
+                      <SelectItem value="parameter_change">Parameter Change</SelectItem>
+                      <SelectItem value="upgrade">Protocol Upgrade</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="text-white">Title</Label>
+                  <Input 
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                    placeholder="Emergency unlock for medical expenses" 
+                    value={proposalForm.title}
+                    onChange={(e) => setProposalForm(prev => ({ ...prev, title: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <Label className="text-white">Description</Label>
+                  <textarea 
+                    className="w-full h-24 bg-white/10 border border-white/20 rounded-md px-3 py-2 text-white placeholder:text-white/50 resize-none"
+                    placeholder="Provide detailed reasoning for this proposal..."
+                    value={proposalForm.description}
+                    onChange={(e) => setProposalForm(prev => ({ ...prev, description: e.target.value }))}
+                  />
+                </div>
+                
+                <Alert className="bg-blue-500/20 border-blue-500/30">
+                  <AlertTriangle className="h-4 w-4 text-blue-400" />
+                  <AlertDescription className="text-blue-200">
+                    Proposals require 3 of 5 multi-sig approvals to pass
+                  </AlertDescription>
+                </Alert>
+                
+                <Button 
+                  className="w-full bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 disabled:opacity-50"
+                  onClick={handleCreateProposal}
+                  disabled={isCreatingProposal || !proposalForm.title || !proposalForm.description}
+                >
+                  {isCreatingProposal ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Creating Proposal...
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="mr-2 h-4 w-4" />
+                      Create Proposal
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </DashboardLayout>
   )

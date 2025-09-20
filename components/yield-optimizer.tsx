@@ -4,14 +4,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Zap, TrendingUp, Shield, AlertTriangle, ExternalLink, Wallet } from "lucide-react"
+import { Zap, TrendingUp, Shield, AlertTriangle, ExternalLink, Wallet, Rocket } from "lucide-react"
 import { useAccount } from "wagmi"
 import { useState, useEffect } from "react"
+import { useToast } from "@/hooks/use-toast"
 
 export function YieldOptimizer() {
   const { address, isConnected } = useAccount()
   const [realData, setRealData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [showRocket, setShowRocket] = useState(false)
+  const [riskDialogOpen, setRiskDialogOpen] = useState(false)
+  const { toast } = useToast()
 
   // Fetch real blockchain data
   useEffect(() => {
@@ -41,6 +45,20 @@ export function YieldOptimizer() {
 
     fetchRealYieldData()
   }, [address, isConnected])
+
+  // Handle risk selection with rocket animation
+  const handleRiskSelection = (riskType: string) => {
+    setShowRocket(true)
+    setRiskDialogOpen(false)
+    
+    setTimeout(() => {
+      setShowRocket(false)
+      toast({
+        title: "🚀 Risk Profile Updated!",
+        description: `${riskType} risk profile activated for yield optimization`,
+      })
+    }, 2000)
+  }
 
   if (!isConnected) {
     return (
@@ -124,7 +142,7 @@ export function YieldOptimizer() {
 
           {/* Action Buttons with Glass Morphism Popups */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Dialog>
+            <Dialog open={riskDialogOpen} onOpenChange={setRiskDialogOpen}>
               <DialogTrigger asChild>
                 <Button className="bg-gradient-to-r from-primary/20 to-primary/10 backdrop-blur-sm border border-primary/20 hover:from-primary/30 hover:to-primary/20 transition-all duration-300 hover:scale-105">
                   <Shield className="h-4 w-4 mr-2" />
@@ -143,13 +161,25 @@ export function YieldOptimizer() {
                     Configure your risk tolerance for automated yield optimization
                   </p>
                   <div className="space-y-2">
-                    <Button variant="outline" className="w-full justify-start">
+                    <Button 
+                      variant="outline" 
+                      className="w-full justify-start hover:bg-green-500/20 hover:border-green-500/50"
+                      onClick={() => handleRiskSelection("Conservative")}
+                    >
                       Conservative (Low Risk)
                     </Button>
-                    <Button variant="outline" className="w-full justify-start">
+                    <Button 
+                      variant="outline" 
+                      className="w-full justify-start hover:bg-yellow-500/20 hover:border-yellow-500/50"
+                      onClick={() => handleRiskSelection("Balanced")}
+                    >
                       Balanced (Medium Risk)
                     </Button>
-                    <Button variant="outline" className="w-full justify-start">
+                    <Button 
+                      variant="outline" 
+                      className="w-full justify-start hover:bg-red-500/20 hover:border-red-500/50"
+                      onClick={() => handleRiskSelection("Aggressive")}
+                    >
                       Aggressive (High Risk)
                     </Button>
                   </div>
@@ -231,6 +261,17 @@ export function YieldOptimizer() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Rocket Animation */}
+      {showRocket && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
+          <div className="animate-bounce">
+            <div className="bg-gradient-to-r from-green-400 via-blue-500 to-purple-600 rounded-full p-6 shadow-2xl animate-pulse">
+              <Rocket className="h-12 w-12 text-white animate-spin" />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
