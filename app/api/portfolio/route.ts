@@ -42,20 +42,7 @@ export async function GET(request: NextRequest) {
           apy: 15.2
         }
       ],
-      recentActivity: [
-        {
-          type: "SIP_EXECUTED",
-          description: "Weekly USDC SIP executed",
-          amount: portfolioData.activeSIPs > 0 ? (portfolioData.totalInvested / portfolioData.activeSIPs).toFixed(2) : "0",
-          timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
-        },
-        {
-          type: "YIELD_EARNED",
-          description: "Yield earned from liquidity pools",
-          amount: (portfolioData.totalReturn * 0.1).toFixed(2),
-          timestamp: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString()
-        }
-      ]
+      recentActivity: []
     }
 
     return NextResponse.json({
