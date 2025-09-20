@@ -23,14 +23,14 @@ export class WalletManager {
 
   // Somnia network configuration
   private somniaConfig = {
-    chainId: "0xa58", // 2648 in hex
+    chainId: "5031", // 2648 in hex
     chainName: "Somnia Mainnet",
     nativeCurrency: {
       name: "SOM",
-      symbol: "SOM",
+      symbol: "SOMI",
       decimals: 18,
     },
-    rpcUrls: ["https://rpc.somnia.network"],
+    rpcUrls: ["https://api.infra.mainnet.somnia.network/"],
     blockExplorerUrls: ["https://explorer.somnia.network"],
   }
 
