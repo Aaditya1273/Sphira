@@ -56,7 +56,7 @@ const premiumDemoData = {
     },
     {
       id: 2,
-      wallet_address: '0x8ba1f109551bD432803012645ac136c22C177e9',
+      wallet_address: '0x8ba1f109551bD432803012645ac136c22C177e9D',
       created_at: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
       last_active: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
       preferences: {
@@ -145,7 +145,7 @@ const premiumDemoData = {
     {
       id: 4,
       sip_id: 4,
-      user_address: '0x8ba1f109551bD432803012645ac136c22C177e9',
+      user_address: '0x8ba1f109551bD432803012645ac136c22C177e9D',
       token_address: '0xA0b86a33E6441e6e80D0c4C6C7527d72e1d00000',
       token_symbol: 'USDC',
       amount: '750.00',
@@ -184,7 +184,7 @@ const premiumDemoData = {
     },
     {
       id: 3,
-      user_address: '0x8ba1f109551bD432803012645ac136c22C177e9',
+      user_address: '0x8ba1f109551bD432803012645ac136c22C177e9D',
       token_address: '0xA0b86a33E6441e6e80D0c4C6C7527d72e1d00000',
       pool_id: 1,
       amount: '89.23',
@@ -212,7 +212,7 @@ const premiumDemoData = {
     {
       id: 2,
       lock_id: 2,
-      user_address: '0x8ba1f109551bD432803012645ac136c22C177e9',
+      user_address: '0x8ba1f109551bD432803012645ac136c22C177e9D',
       token_address: '0xA0b86a33E6441e6e80D0c4C6C7527d72e1d00000',
       amount: '25000.00',
       lock_duration: 2592000, // 30 days
@@ -271,7 +271,7 @@ const premiumDemoData = {
     },
     {
       id: 3,
-      user_address: '0x8ba1f109551bD432803012645ac136c22C177e9',
+      user_address: '0x8ba1f109551bD432803012645ac136c22C177e9D',
       message: 'How is my yield performance?',
       response: 'Your yield performance is excellent! Current APY: 11.7% | Total earned this month: $89.23',
       command: null,
@@ -293,7 +293,7 @@ const premiumDemoData = {
     },
     {
       id: 2,
-      user_address: '0x8ba1f109551bD432803012645ac136c22C177e9',
+      user_address: '0x8ba1f109551bD432803012645ac136c22C177e9D',
       total_value: '34642.34',
       breakdown: {
         sips: '8750.00',
@@ -324,7 +324,7 @@ const premiumDemoData = {
     },
     {
       id: 3,
-      user_address: '0x8ba1f109551bD432803012645ac136c22C177e9',
+      user_address: '0x8ba1f109551bD432803012645ac136c22C177e9D',
       type: 'YIELD_EARNED',
       title: 'Yield Earned',
       message: 'You earned $89.23 USDC from liquidity pool staking (11.7% APY).',
