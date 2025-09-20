@@ -1,6 +1,47 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { blockchainService } from "@/lib/blockchain-service"
 
+// Generate initial performance data when SIP is created
+async function generateInitialPerformanceData(userAddress: string, sip: any) {
+  try {
+    // Get existing yield history
+    const allYieldHistory = JSON.parse((global as any).tempYieldStorage || '[]')
+    
+    // Generate initial data points (simulating the first few days/weeks)
+    const initialDataPoints = []
+    const startDate = new Date()
+    
+    // Create 5 initial data points showing gradual growth
+    for (let i = 0; i < 5; i++) {
+      const date = new Date(startDate)
+      date.setDate(date.getDate() - (4 - i) * 7) // Weekly intervals going back
+      
+      const progressFactor = (i + 1) / 5
+      const baseAPY = sip.apy_target || 8.5
+      const currentAPY = baseAPY * (0.7 + 0.3 * progressFactor) // Start at 70% of target, grow to 100%
+      const earned = parseFloat(sip.amount) * (currentAPY / 100) * (progressFactor * 0.1) // Cumulative earnings
+      
+      initialDataPoints.push({
+        id: allYieldHistory.length + i + 1,
+        userAddress,
+        apy: parseFloat(currentAPY.toFixed(2)),
+        earned: parseFloat(earned.toFixed(2)),
+        date: date.toISOString(),
+        timestamp: date.getTime(),
+        sipId: sip.id
+      })
+    }
+    
+    // Add to yield history storage
+    allYieldHistory.push(...initialDataPoints)
+    ;(global as any).tempYieldStorage = JSON.stringify(allYieldHistory)
+    
+    console.log(`✅ Generated ${initialDataPoints.length} initial performance data points for SIP ${sip.id}`)
+  } catch (error) {
+    console.error("Failed to generate initial performance data:", error)
+  }
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
@@ -61,6 +102,9 @@ export async function POST(request: NextRequest) {
     }
     existingSIPs[userAddress].push(newSIP)
     ;(global as any).tempSIPStorage = JSON.stringify(existingSIPs)
+
+    // Generate initial performance data for the charts
+    await generateInitialPerformanceData(userAddress, newSIP)
 
     return NextResponse.json({
       success: true,

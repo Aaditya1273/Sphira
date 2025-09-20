@@ -37,7 +37,54 @@ const premiumDemoData = {
   },
   users: [],
   sips: [],
-  yield_history: [],
+  yield_history: [
+    // Sample yield data for demo wallet
+    {
+      id: 1,
+      userAddress: '0x742d35Cc6634C0532925a3b8D4C9db96590c6C87',
+      apy: 8.2,
+      earned: 45.30,
+      date: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+      timestamp: Date.now() - 30 * 24 * 60 * 60 * 1000,
+      sipId: 1
+    },
+    {
+      id: 2,
+      userAddress: '0x742d35Cc6634C0532925a3b8D4C9db96590c6C87',
+      apy: 8.7,
+      earned: 92.15,
+      date: new Date(Date.now() - 23 * 24 * 60 * 60 * 1000).toISOString(),
+      timestamp: Date.now() - 23 * 24 * 60 * 60 * 1000,
+      sipId: 1
+    },
+    {
+      id: 3,
+      userAddress: '0x742d35Cc6634C0532925a3b8D4C9db96590c6C87',
+      apy: 9.1,
+      earned: 143.75,
+      date: new Date(Date.now() - 16 * 24 * 60 * 60 * 1000).toISOString(),
+      timestamp: Date.now() - 16 * 24 * 60 * 60 * 1000,
+      sipId: 1
+    },
+    {
+      id: 4,
+      userAddress: '0x742d35Cc6634C0532925a3b8D4C9db96590c6C87',
+      apy: 9.4,
+      earned: 198.20,
+      date: new Date(Date.now() - 9 * 24 * 60 * 60 * 1000).toISOString(),
+      timestamp: Date.now() - 9 * 24 * 60 * 60 * 1000,
+      sipId: 1
+    },
+    {
+      id: 5,
+      userAddress: '0x742d35Cc6634C0532925a3b8D4C9db96590c6C87',
+      apy: 9.8,
+      earned: 256.40,
+      date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+      timestamp: Date.now() - 2 * 24 * 60 * 60 * 1000,
+      sipId: 1
+    }
+  ],
   vault_locks: [],
   analytics: [],
   chat_history: [],
@@ -88,6 +135,7 @@ console.log(`   🔒 Vault Locks: ${premiumDemoData.vault_locks.length}`)
 console.log(`   📱 Notifications: ${premiumDemoData.notifications.length}`)
 console.log(`   💬 Chat History: ${premiumDemoData.chat_history.length}`)
 console.log(`   🗳️  Proposals: ${premiumDemoData.proposals.length}`)
+console.log(`   📈 Yield History: ${premiumDemoData.yield_history.length}`)
 console.log('')
 console.log('🎯 Database Features:')
 console.log('   ⚡ Lightning-fast JSON operations')
