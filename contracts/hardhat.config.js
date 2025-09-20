@@ -18,9 +18,9 @@ module.exports = {
       chainId: 1337,
     },
     "somnia-testnet": {
-      url: process.env.SOMNIA_TESTNET_RPC_URL || "https://testnet-rpc.somnia.network",
+      url: process.env.SOMNIA_TESTNET_RPC_URL || "https://dream-rpc.somnia.network/",
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
-      chainId: 50311, // Somnia testnet chain ID
+      chainId: 50312, // Somnia testnet chain ID
       gasPrice: 1000000000, // 1 gwei
     },
     "somnia-mainnet": {
@@ -42,10 +42,10 @@ module.exports = {
     customChains: [
       {
         network: "somnia-testnet",
-        chainId: 50311,
+        chainId: 50312,
         urls: {
-          apiURL: "https://testnet-explorer-api.somnia.network/api",
-          browserURL: "https://testnet-explorer.somnia.network",
+          apiURL: "https://shannon-explorer.somnia.network/api",
+          browserURL: "https://shannon-explorer.somnia.network/",
         },
       },
       {

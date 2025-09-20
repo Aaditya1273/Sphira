@@ -59,7 +59,7 @@ const CONTRACT_ADDRESSES = {
   SOM: process.env.NEXT_PUBLIC_SOM_ADDRESS || "0x1234567890123456789012345678901234567890"
 }
 
-const RPC_URL = process.env.SOMNIA_TESTNET_RPC_URL || "https://testnet-rpc.somnia.network"
+const RPC_URL = process.env.SOMNIA_TESTNET_RPC_URL || "https://dream-rpc.somnia.network/"
 
 class BlockchainService {
   private web3: Web3

@@ -41,8 +41,8 @@ export function WalletConnection() {
           usdc: "15,420.50",
           eth: "8.75",
         },
-        chainId: 2648,
-        chainName: "Somnia Mainnet",
+        chainId: 50312,
+        chainName: "Somnia Testnet",
       })
 
       toast({

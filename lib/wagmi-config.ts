@@ -3,22 +3,22 @@
 import { getDefaultConfig } from '@rainbow-me/rainbowkit'
 import { mainnet, polygon, optimism, arbitrum, base } from 'wagmi/chains'
 
-// Define Somnia testnet
+// Define Somnia testnet with official configuration
 const somniaTestnet = {
-  id: 2648,
+  id: 50312,
   name: 'Somnia Testnet',
   nativeCurrency: {
     decimals: 18,
-    name: 'SOM',
-    symbol: 'SOM',
+    name: 'STT',
+    symbol: 'STT',
   },
   rpcUrls: {
     default: {
-      http: ['https://testnet-rpc.somnia.network'],
+      http: ['https://dream-rpc.somnia.network/'],
     },
   },
   blockExplorers: {
-    default: { name: 'Somnia Explorer', url: 'https://testnet-explorer.somnia.network' },
+    default: { name: 'Shannon Explorer', url: 'https://shannon-explorer.somnia.network/' },
   },
   testnet: true,
 } as const
